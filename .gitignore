@@ -1,83 +1,23 @@
-# Node modules
-/node_modules
-/server/node_modules
-/client/node_modules
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# Logs
-logs
-*.log
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# production
+/build
+
+# misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-
-# Environment variables
-.env
-.env.local
-.env.*.local
-
-# AWS credentials
-.aws/credentials
-
-# Production Environment
-/build
-/dist
-
-# Dependency directories
-/client/node_modules/
-/server/node_modules/
-
-# npm lock files
-package-lock.json
-yarn.lock
-
-# Babel, ESLint, and TypeScript cache
-.babelrc
-.eslintcache
-.cache
-/coverage
-/tsconfig.tsbuildinfo
-
-# Build output
-/client/build
-/server/build
-
-# React specific
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-.yarn-integrity
-.yarn-error.log
-
-# Static files
-/public/static
-/public/assets
-
-# OS generated files
-.DS_Store
-Thumbs.db
-
-# AWS-specific files
-*.pem
-*.key
-/terraform.tfstate
-/terraform.tfstate.backup
-
-# IDE or Editor files
-/.vscode/
-/.idea/
-/*.swp
-
-# S3 upload cache (if any)
-s3-upload-cache
-
-# Lambda deployment files (if applicable)
-/.handler/
-.handler.zip
-
-# AWS CDK assets
-cdk.out/
-
-# Docker files (if using Docker)
-/docker-compose.yml
-.dockerignore
-docker-compose.override.yml
