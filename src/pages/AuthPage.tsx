@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { TextField, Button, Tab, Tabs, Box } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -28,6 +29,7 @@ const AuthPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const navigate = useNavigate();
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
@@ -37,12 +39,18 @@ const AuthPage: React.FC = () => {
     e.preventDefault();
     // Here you would typically handle the login logic
     console.log('Login attempt with:', { email, password });
+
+    // Assuming login is successful
+    navigate('/stud_dashboard'); // Navigate to StudentDashboard
   };
 
   const handleSignup = (e: React.FormEvent) => {
     e.preventDefault();
     // Here you would typically handle the signup logic
     console.log('Signup attempt with:', { name, email, password });
+
+    // Assuming signup is successful
+    navigate('/stud_dashboard'); // Navigate to StudentDashboard
   };
 
   return (
