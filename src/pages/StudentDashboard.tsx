@@ -7,6 +7,7 @@ import {
   ListItem,
   ListItemText,
 } from '@mui/material';
+import LogoutButton from '../components/LogoutButton';
 
 const StudentDashboard: React.FC = () => {
   return (
@@ -18,37 +19,43 @@ const StudentDashboard: React.FC = () => {
           backgroundColor: '#6a1b9a',
           color: 'white',
           padding: 2,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
         }}
       >
-        <Typography variant="h5" gutterBottom>
-          Hi Student
-        </Typography>
-        <List>
-          <ListItem component="button">
-            <ListItemText primary="My Projects" />
-          </ListItem>
-          <ListItem component="button">
-            <ListItemText primary="Paperwork" />
-            <Box
-              sx={{
-                ml: 1,
-                backgroundColor: 'red',
-                borderRadius: '50%',
-                width: 20,
-                height: 20,
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                color: 'white',
-              }}
-            >
-              1
-            </Box>
-          </ListItem>
-          <ListItem component="button">
-            <ListItemText primary="Account Settings" />
-          </ListItem>
-        </List>
+        <Box>
+          <Typography variant="h5" gutterBottom>
+            Hi Student
+          </Typography>
+          <List>
+            <ListItem component="button">
+              <ListItemText primary="My Projects" />
+            </ListItem>
+            <ListItem component="button">
+              <ListItemText primary="Paperwork" />
+              <Box
+                sx={{
+                  ml: 1,
+                  backgroundColor: 'red',
+                  borderRadius: '50%',
+                  width: 20,
+                  height: 20,
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  color: 'white',
+                }}
+              >
+                1
+              </Box>
+            </ListItem>
+            <ListItem component="button">
+              <ListItemText primary="Account Settings" />
+            </ListItem>
+          </List>
+        </Box>
+        <LogoutButton variant="outlined" color="inherit" />
       </Box>
 
       {/* Main content area */}
