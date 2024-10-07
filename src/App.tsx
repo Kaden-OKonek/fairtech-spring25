@@ -1,11 +1,5 @@
 import React, { useEffect } from 'react';
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-  useNavigate,
-} from 'react-router-dom';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import './App.css';
 import AuthPage from './pages/AuthPage';
 import { useAuthState } from 'react-firebase-hooks/auth';
@@ -31,25 +25,11 @@ function App() {
   }
 
   return (
-    <div className="App">
-      <Routes>
-        <Route
-          path="/"
-          element={user ? <Navigate to="/stud_dashboard" /> : <AuthPage />}
-        />
-        <Route
-          path="/stud_dashboard"
-          element={user ? <StudentDashboard /> : <Navigate to="/" />}
-        />
-      </Routes>
-    </div>
+    <Routes>
+      <Route path="/" element={<AuthPage />} />
+      <Route path="/stud_dashboard" element={<StudentDashboard />} />
+    </Routes>
   );
 }
 
-export default function AppWrapper() {
-  return (
-    <Router>
-      <App />
-    </Router>
-  );
-}
+export default App;
