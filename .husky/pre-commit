@@ -1,0 +1,2 @@
+npx lint-staged
+CI=true npm test
