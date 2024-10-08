@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
-import { TextField, Button, Tab, Tabs, Box } from '@mui/material';
+import { TextField, Button, Tab, Tabs, Box, Divider } from '@mui/material';
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
+} from 'firebase/auth';
+import { auth } from '../firebase';
 import { useNavigate } from 'react-router-dom';
 
 interface TabPanelProps {
@@ -28,29 +35,51 @@ const AuthPage: React.FC = () => {
   const [tabValue, setTabValue] = useState(0);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
+    setError('');
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically handle the login logic
-    console.log('Login attempt with:', { email, password });
-
-    // Assuming login is successful
-    navigate('/stud_dashboard'); // Navigate to StudentDashboard
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      console.log('User logged in successfully');
+      // Handle successful login (e.g., redirect to dashboard)
+      navigate('/stud_dashboard'); // Navigate to StudentDashboard
+    } catch (error) {
+      setError('Failed to log in. Please check your credentials.');
+      console.error(error);
+    }
   };
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically handle the signup logic
-    console.log('Signup attempt with:', { name, email, password });
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+      console.log('User signed up successfully');
+      // Handle successful signup (e.g., redirect to dashboard)
+      navigate('/stud_dashboard'); // Navigate to StudentDashboard
+    } catch (error) {
+      setError('Failed to create an account. Please try again.');
+      console.error(error);
+    }
+  };
 
-    // Assuming signup is successful
-    navigate('/stud_dashboard'); // Navigate to StudentDashboard
+  const handleGoogleSignIn = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+      console.log('User signed in with Google successfully');
+      // Handle successful Google sign-in (e.g., redirect to dashboard)
+      navigate('/stud_dashboard'); // Navigate to StudentDashboard
+    } catch (error) {
+      setError('Failed to sign in with Google. Please try again.');
+      console.error(error);
+    }
   };
 
   return (
@@ -59,6 +88,12 @@ const AuthPage: React.FC = () => {
         <Tab label="Login" />
         <Tab label="Sign Up" />
       </Tabs>
+
+      {error && (
+        <Box sx={{ color: 'error.main', textAlign: 'center', mt: 2 }}>
+          {error}
+        </Box>
+      )}
 
       <TabPanel value={tabValue} index={0}>
         <form onSubmit={handleLogin}>
@@ -87,13 +122,6 @@ const AuthPage: React.FC = () => {
         <form onSubmit={handleSignup}>
           <TextField
             fullWidth
-            label="Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            margin="normal"
-          />
-          <TextField
-            fullWidth
             label="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -112,6 +140,17 @@ const AuthPage: React.FC = () => {
           </Button>
         </form>
       </TabPanel>
+
+      <Divider sx={{ my: 3 }}>OR</Divider>
+
+      <Button
+        fullWidth
+        variant="outlined"
+        onClick={handleGoogleSignIn}
+        sx={{ mt: 2 }}
+      >
+        Sign in with Google
+      </Button>
     </Box>
   );
 };
