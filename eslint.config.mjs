@@ -39,6 +39,7 @@ export default [
     rules: {
       // TypeScript specific rules
       "@typescript-eslint/no-unused-vars": "error",
+      "@typescript-eslint/explicit-function-return-type": "warn",
       "@typescript-eslint/no-explicit-any": "warn",
       
       // React specific rules
