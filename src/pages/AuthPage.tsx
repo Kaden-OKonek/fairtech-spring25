@@ -15,15 +15,9 @@ import {
 	GoogleAuthProvider,
 	sendEmailVerification,
 	AuthError,
-	User,
 } from 'firebase/auth';
-import { auth, functions } from '../firebase';
-import { httpsCallable } from 'firebase/functions';
+import { auth } from '../firebase';
 import { useNavigate } from 'react-router-dom';
-
-interface UserStatusResult {
-	isActive: boolean;
-}
 
 interface TabPanelProps {
 	children?: React.ReactNode;
@@ -64,38 +58,21 @@ const AuthPage: React.FC = () => {
 		setConfirmPassword('');
 	};
 
-	const handleSuccessfulAuth = (user: User) => {
-		if (user.emailVerified) {
-			navigate('/user-type-selection');
-		} else {
-			setMessage('Please verify your email before accessing the application.');
-		}
+	const handleSuccessfulAuth = (): void => {
+		navigate('/user-type-selection');
 	};
 
-	const handleLogin = async (e: React.FormEvent) => {
+	const handleLogin = async (e: React.FormEvent): Promise<void> => {
 		e.preventDefault();
 		try {
-			const userCredential = await signInWithEmailAndPassword(
-				auth,
-				email,
-				password
-			);
-			const checkUserStatus = httpsCallable<
-				{ userId: string },
-				UserStatusResult
-			>(functions, 'checkUserStatus');
-			const result = await checkUserStatus({ userId: userCredential.user.uid });
-			if (result.data.isActive) {
-				handleSuccessfulAuth(userCredential.user);
-			} else {
-				setError('Your account is not active. Please verify your email.');
-			}
+			await signInWithEmailAndPassword(auth, email, password);
+			handleSuccessfulAuth();
 		} catch (error) {
 			handleAuthError(error as AuthError);
 		}
 	};
 
-	const handleSignup = async (e: React.FormEvent) => {
+	const handleSignup = async (e: React.FormEvent): Promise<void> => {
 		e.preventDefault();
 		if (password !== confirmPassword) {
 			setError("Passwords don't match.");
@@ -116,20 +93,11 @@ const AuthPage: React.FC = () => {
 		}
 	};
 
-	const handleGoogleSignIn = async () => {
+	const handleGoogleSignIn = async (): Promise<void> => {
 		const provider = new GoogleAuthProvider();
 		try {
-			const result = await signInWithPopup(auth, provider);
-			const checkUserStatus = httpsCallable<
-				{ userId: string },
-				UserStatusResult
-			>(functions, 'checkUserStatus');
-			const statusResult = await checkUserStatus({ userId: result.user.uid });
-			if (statusResult.data.isActive) {
-				handleSuccessfulAuth(result.user);
-			} else {
-				setError('Your account is not active. Please contact support.');
-			}
+			await signInWithPopup(auth, provider);
+			handleSuccessfulAuth();
 		} catch (error) {
 			handleAuthError(error as AuthError);
 		}

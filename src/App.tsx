@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
+import React from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
 import AuthPage from './pages/AuthPage';
 import { useAuthState } from 'react-firebase-hooks/auth';
@@ -8,17 +8,11 @@ import StudentDashboard from './pages/StudentDashboard';
 import UserTypeSelection from './components/UserTypeSelection';
 import StudentRegistration from './components/StudentRegistration';
 import { UserTypeProvider, useUserType } from './contexts/UserTypeContext';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function AppRoutes() {
 	const [user, loading, error] = useAuthState(auth);
 	const { userType } = useUserType();
-	const navigate = useNavigate();
-
-	useEffect(() => {
-		if (user && !userType) {
-			navigate('/user-type-selection');
-		}
-	}, [user, userType, navigate]);
 
 	if (loading) {
 		return <div>Loading...</div>;
@@ -36,21 +30,31 @@ function AppRoutes() {
 			/>
 			<Route
 				path="/user-type-selection"
-				element={user ? <UserTypeSelection /> : <Navigate to="/login" />}
+				element={
+					<ProtectedRoute>
+						<UserTypeSelection />
+					</ProtectedRoute>
+				}
 			/>
 			<Route
 				path="/student-registration"
 				element={
-					user && userType === 'student' ? (
-						<StudentRegistration />
-					) : (
-						<Navigate to={user ? '/user-type-selection' : '/login'} />
-					)
+					<ProtectedRoute>
+						{userType === 'student' ? (
+							<StudentRegistration />
+						) : (
+							<Navigate to="/user-type-selection" />
+						)}
+					</ProtectedRoute>
 				}
 			/>
 			<Route
 				path="/stud_dashboard"
-				element={user ? <StudentDashboard /> : <Navigate to="/login" />}
+				element={
+					<ProtectedRoute>
+						<StudentDashboard />
+					</ProtectedRoute>
+				}
 			/>
 			<Route
 				path="*"
