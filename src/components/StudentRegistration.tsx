@@ -1,7 +1,20 @@
 import React, { useState } from 'react';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
-import { TextField, Button, Box, Typography } from '@mui/material';
+import {
+	TextField,
+	Button,
+	Box,
+	Typography,
+	Paper,
+	Grid,
+	Stepper,
+	Step,
+	StepLabel,
+	useTheme,
+	useMediaQuery,
+} from '@mui/material';
+import { styled } from '@mui/system';
 import { useNavigate } from 'react-router-dom';
 import { doc, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
@@ -28,6 +41,19 @@ const validationSchema = Yup.object().shape({
 		.required('Zip code is required'),
 });
 
+const StyledPaper = styled(Paper)(({ theme }) => ({
+	padding: theme.spacing(3),
+	[theme.breakpoints.up('md')]: {
+		padding: theme.spacing(6),
+	},
+}));
+
+const StyledForm = styled(Form)({
+	display: 'flex',
+	flexDirection: 'column',
+	gap: '1rem',
+});
+
 const StudentRegistration: React.FC = () => {
 	const navigate = useNavigate();
 	const [user] = useAuthState(auth);
@@ -35,6 +61,10 @@ const StudentRegistration: React.FC = () => {
 	const [registrationError, setRegistrationError] = useState<string | null>(
 		null
 	);
+	const theme = useTheme();
+	const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+	const [activeStep, setActiveStep] = useState(0);
+	const steps = ['Personal Info', 'Contact Info', 'School Info'];
 
 	const handleSubmit = async (values: any, { setSubmitting }: any) => {
 		if (!user) {
@@ -81,126 +111,178 @@ const StudentRegistration: React.FC = () => {
 	};
 
 	return (
-		<Box sx={{ maxWidth: 400, margin: 'auto', mt: 4 }}>
-			<Typography variant="h5" gutterBottom>
-				Student Registration
-			</Typography>
-			{registrationError && (
-				<Typography color="error" sx={{ mb: 2 }}>
-					{registrationError}
+		<Box sx={{ maxWidth: 600, margin: 'auto', mt: 4, px: 2 }}>
+			<StyledPaper elevation={3}>
+				<Typography variant="h4" gutterBottom align="center" color="primary">
+					Student Registration
 				</Typography>
-			)}
-			<Formik
-				initialValues={{
-					firstName: '',
-					lastName: '',
-					school: '',
-					grade: '',
-					phone: '',
-					address: '',
-					city: '',
-					state: '',
-					zipCode: '',
-				}}
-				validationSchema={validationSchema}
-				onSubmit={handleSubmit}
-			>
-				{({ errors, touched, isSubmitting }) => (
-					<Form>
-						<Field
-							as={TextField}
-							fullWidth
-							name="firstName"
-							label="First Name"
-							error={touched.firstName && errors.firstName}
-							helperText={touched.firstName && errors.firstName}
-							margin="normal"
-						/>
-						<Field
-							as={TextField}
-							fullWidth
-							name="lastName"
-							label="Last Name"
-							error={touched.lastName && errors.lastName}
-							helperText={touched.lastName && errors.lastName}
-							margin="normal"
-						/>
-						<Field
-							as={TextField}
-							fullWidth
-							name="school"
-							label="School"
-							error={touched.school && errors.school}
-							helperText={touched.school && errors.school}
-							margin="normal"
-						/>
-						<Field
-							as={TextField}
-							fullWidth
-							name="grade"
-							label="Grade"
-							type="number"
-							error={touched.grade && errors.grade}
-							helperText={touched.grade && errors.grade}
-							margin="normal"
-						/>
-						<Field
-							as={TextField}
-							fullWidth
-							name="phone"
-							label="Phone Number"
-							error={touched.phone && errors.phone}
-							helperText={touched.phone && errors.phone}
-							margin="normal"
-						/>
-						<Field
-							as={TextField}
-							fullWidth
-							name="address"
-							label="Address"
-							error={touched.address && errors.address}
-							helperText={touched.address && errors.address}
-							margin="normal"
-						/>
-						<Field
-							as={TextField}
-							fullWidth
-							name="city"
-							label="City"
-							error={touched.city && errors.city}
-							helperText={touched.city && errors.city}
-							margin="normal"
-						/>
-						<Field
-							as={TextField}
-							fullWidth
-							name="state"
-							label="State"
-							error={touched.state && errors.state}
-							helperText={touched.state && errors.state}
-							margin="normal"
-						/>
-						<Field
-							as={TextField}
-							fullWidth
-							name="zipCode"
-							label="Zip Code"
-							error={touched.zipCode && errors.zipCode}
-							helperText={touched.zipCode && errors.zipCode}
-							margin="normal"
-						/>
-						<Button
-							type="submit"
-							variant="contained"
-							color="primary"
-							disabled={isSubmitting}
-							sx={{ mt: 2 }}
-						>
-							Submit
-						</Button>
-					</Form>
+
+				<Stepper
+					activeStep={activeStep}
+					alternativeLabel={!isMobile}
+					orientation={isMobile ? 'vertical' : 'horizontal'}
+					sx={{ mb: 4 }}
+				>
+					{steps.map((label) => (
+						<Step key={label}>
+							<StepLabel>{label}</StepLabel>
+						</Step>
+					))}
+				</Stepper>
+
+				{registrationError && (
+					<Typography color="error" sx={{ mb: 2 }}>
+						{registrationError}
+					</Typography>
 				)}
-			</Formik>
+
+				<Formik
+					initialValues={{
+						firstName: '',
+						lastName: '',
+						school: '',
+						grade: '',
+						phone: '',
+						address: '',
+						city: '',
+						state: '',
+						zipCode: '',
+					}}
+					validationSchema={validationSchema}
+					onSubmit={handleSubmit}
+				>
+					{({ errors, touched, isSubmitting }) => (
+						<StyledForm>
+							{activeStep === 0 && (
+								<>
+									<Field
+										as={TextField}
+										fullWidth
+										name="firstName"
+										label="First Name"
+										error={touched.firstName && errors.firstName}
+										helperText={touched.firstName && errors.firstName}
+									/>
+									<Field
+										as={TextField}
+										fullWidth
+										name="lastName"
+										label="Last Name"
+										error={touched.lastName && errors.lastName}
+										helperText={touched.lastName && errors.lastName}
+									/>
+								</>
+							)}
+
+							{activeStep === 1 && (
+								<>
+									<Field
+										as={TextField}
+										fullWidth
+										name="phone"
+										label="Phone Number"
+										error={touched.phone && errors.phone}
+										helperText={touched.phone && errors.phone}
+									/>
+									<Field
+										as={TextField}
+										fullWidth
+										name="address"
+										label="Address"
+										error={touched.address && errors.address}
+										helperText={touched.address && errors.address}
+									/>
+									<Grid container spacing={2}>
+										<Grid item xs={12} sm={6}>
+											<Field
+												as={TextField}
+												fullWidth
+												name="city"
+												label="City"
+												error={touched.city && errors.city}
+												helperText={touched.city && errors.city}
+											/>
+										</Grid>
+										<Grid item xs={12} sm={3}>
+											<Field
+												as={TextField}
+												fullWidth
+												name="state"
+												label="State"
+												error={touched.state && errors.state}
+												helperText={touched.state && errors.state}
+											/>
+										</Grid>
+										<Grid item xs={12} sm={3}>
+											<Field
+												as={TextField}
+												fullWidth
+												name="zipCode"
+												label="Zip Code"
+												error={touched.zipCode && errors.zipCode}
+												helperText={touched.zipCode && errors.zipCode}
+											/>
+										</Grid>
+									</Grid>
+								</>
+							)}
+
+							{activeStep === 2 && (
+								<>
+									<Field
+										as={TextField}
+										fullWidth
+										name="school"
+										label="School"
+										error={touched.school && errors.school}
+										helperText={touched.school && errors.school}
+									/>
+									<Field
+										as={TextField}
+										fullWidth
+										name="grade"
+										label="Grade"
+										type="number"
+										error={touched.grade && errors.grade}
+										helperText={touched.grade && errors.grade}
+									/>
+								</>
+							)}
+
+							<Box
+								sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}
+							>
+								<Button
+									variant="outlined"
+									color="primary"
+									disabled={activeStep === 0}
+									onClick={() => setActiveStep((prev) => prev - 1)}
+								>
+									Back
+								</Button>
+								{activeStep === steps.length - 1 ? (
+									<Button
+										type="submit"
+										variant="contained"
+										color="primary"
+										disabled={isSubmitting}
+									>
+										Submit
+									</Button>
+								) : (
+									<Button
+										variant="contained"
+										color="primary"
+										onClick={() => setActiveStep((prev) => prev + 1)}
+									>
+										Next
+									</Button>
+								)}
+							</Box>
+						</StyledForm>
+					)}
+				</Formik>
+			</StyledPaper>
 		</Box>
 	);
 };
