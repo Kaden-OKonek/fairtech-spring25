@@ -15,8 +15,17 @@ const validationSchema = Yup.object().shape({
 	school: Yup.string().required('School name is required'),
 	grade: Yup.number()
 		.required('Grade is required')
-		.min(1, 'Grade must be at least 1')
+		.min(1, 'Grade must be at least 5')
 		.max(12, 'Grade must be at most 12'),
+	phone: Yup.string()
+		.matches(/^[0-9]{10}$/, 'Phone number must be 10 digits')
+		.required('Phone number is required'),
+	address: Yup.string().required('Address is required'),
+	city: Yup.string().required('City is required'),
+	state: Yup.string().required('State is required'),
+	zipCode: Yup.string()
+		.matches(/^[0-9]{5}$/, 'Zip code must be 5 digits')
+		.required('Zip code is required'),
 });
 
 const StudentRegistration: React.FC = () => {
@@ -49,6 +58,11 @@ const StudentRegistration: React.FC = () => {
 					lastName: values.lastName,
 					school: values.school,
 					grade: values.grade,
+					phone: values.phone,
+					address: values.address,
+					city: values.city,
+					state: values.state,
+					zipCode: values.zipCode,
 					updatedAt: new Date(),
 				},
 				{ merge: true }
@@ -82,7 +96,11 @@ const StudentRegistration: React.FC = () => {
 					lastName: '',
 					school: '',
 					grade: '',
-					interests: '',
+					phone: '',
+					address: '',
+					city: '',
+					state: '',
+					zipCode: '',
 				}}
 				validationSchema={validationSchema}
 				onSubmit={handleSubmit}
@@ -124,6 +142,51 @@ const StudentRegistration: React.FC = () => {
 							type="number"
 							error={touched.grade && errors.grade}
 							helperText={touched.grade && errors.grade}
+							margin="normal"
+						/>
+						<Field
+							as={TextField}
+							fullWidth
+							name="phone"
+							label="Phone Number"
+							error={touched.phone && errors.phone}
+							helperText={touched.phone && errors.phone}
+							margin="normal"
+						/>
+						<Field
+							as={TextField}
+							fullWidth
+							name="address"
+							label="Address"
+							error={touched.address && errors.address}
+							helperText={touched.address && errors.address}
+							margin="normal"
+						/>
+						<Field
+							as={TextField}
+							fullWidth
+							name="city"
+							label="City"
+							error={touched.city && errors.city}
+							helperText={touched.city && errors.city}
+							margin="normal"
+						/>
+						<Field
+							as={TextField}
+							fullWidth
+							name="state"
+							label="State"
+							error={touched.state && errors.state}
+							helperText={touched.state && errors.state}
+							margin="normal"
+						/>
+						<Field
+							as={TextField}
+							fullWidth
+							name="zipCode"
+							label="Zip Code"
+							error={touched.zipCode && errors.zipCode}
+							helperText={touched.zipCode && errors.zipCode}
 							margin="normal"
 						/>
 						<Button
