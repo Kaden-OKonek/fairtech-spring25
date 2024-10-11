@@ -7,6 +7,11 @@ import {
 	Box,
 	Divider,
 	Typography,
+	List,
+	ListItem,
+	ListItemIcon,
+	ListItemText,
+	Collapse,
 } from '@mui/material';
 import {
 	createUserWithEmailAndPassword,
@@ -18,6 +23,8 @@ import {
 } from 'firebase/auth';
 import { auth } from '../firebase';
 import { useNavigate } from 'react-router-dom';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 
 interface TabPanelProps {
 	children?: React.ReactNode;
@@ -48,7 +55,16 @@ const AuthPage: React.FC = () => {
 	const [confirmPassword, setConfirmPassword] = useState('');
 	const [error, setError] = useState('');
 	const [message, setMessage] = useState('');
+	const [showPasswordRequirements, setShowPasswordRequirements] =
+		useState(false);
 	const navigate = useNavigate();
+
+	const [passwordRequirements, setPasswordRequirements] = useState({
+		length: false,
+		lowercase: false,
+		uppercase: false,
+		nonAlphanumeric: false,
+	});
 
 	const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
 		setTabValue(newValue);
@@ -56,6 +72,13 @@ const AuthPage: React.FC = () => {
 		setEmail('');
 		setPassword('');
 		setConfirmPassword('');
+		setPasswordRequirements({
+			length: false,
+			lowercase: false,
+			uppercase: false,
+			nonAlphanumeric: false,
+		});
+		setShowPasswordRequirements(false);
 	};
 
 	const handleSuccessfulAuth = (): void => {
@@ -76,6 +99,10 @@ const AuthPage: React.FC = () => {
 		e.preventDefault();
 		if (password !== confirmPassword) {
 			setError("Passwords don't match.");
+			return;
+		}
+		if (!Object.values(passwordRequirements).every(Boolean)) {
+			setError("Password doesn't meet all requirements.");
 			return;
 		}
 		try {
@@ -123,6 +150,29 @@ const AuthPage: React.FC = () => {
 				break;
 		}
 		console.error(error);
+	};
+
+	const checkPasswordRequirements = (password: string) => {
+		setPasswordRequirements({
+			length: password.length >= 6,
+			lowercase: /[a-z]/.test(password),
+			uppercase: /[A-Z]/.test(password),
+			nonAlphanumeric: /[^a-zA-Z0-9]/.test(password),
+		});
+	};
+
+	const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const newPassword = e.target.value;
+		setPassword(newPassword);
+		checkPasswordRequirements(newPassword);
+	};
+
+	const handlePasswordFocus = () => {
+		setShowPasswordRequirements(true);
+	};
+
+	const handlePasswordBlur = () => {
+		setShowPasswordRequirements(false);
 	};
 
 	return (
@@ -181,10 +231,37 @@ const AuthPage: React.FC = () => {
 						label="Password"
 						type="password"
 						value={password}
-						onChange={(e) => setPassword(e.target.value)}
+						onChange={handlePasswordChange}
+						onFocus={handlePasswordFocus}
+						onBlur={handlePasswordBlur}
 						margin="normal"
-						helperText="Please choose a strong password"
 					/>
+					<Collapse in={showPasswordRequirements}>
+						<List dense>
+							{Object.entries(passwordRequirements).map(([key, met]) => (
+								<ListItem key={key}>
+									<ListItemIcon>
+										{met ? (
+											<CheckCircleOutlineIcon color="success" />
+										) : (
+											<ErrorOutlineIcon color="error" />
+										)}
+									</ListItemIcon>
+									<ListItemText
+										primary={
+											key === 'length'
+												? 'At least 6 characters'
+												: key === 'lowercase'
+													? 'Contains lowercase letter'
+													: key === 'uppercase'
+														? 'Contains uppercase letter'
+														: 'Contains non-alphanumeric character'
+										}
+									/>
+								</ListItem>
+							))}
+						</List>
+					</Collapse>
 					<TextField
 						fullWidth
 						label="Confirm Password"
