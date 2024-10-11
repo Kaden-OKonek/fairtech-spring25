@@ -59,7 +59,7 @@ const AuthPage: React.FC = () => {
 	};
 
 	const handleSuccessfulAuth = (): void => {
-		navigate('/user-type-selection');
+		navigate('/status-check');
 	};
 
 	const handleLogin = async (e: React.FormEvent): Promise<void> => {

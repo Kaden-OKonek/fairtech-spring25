@@ -9,6 +9,7 @@ import UserTypeSelection from './components/UserTypeSelection';
 import StudentRegistration from './components/StudentRegistration';
 import { UserTypeProvider, useUserType } from './contexts/UserTypeContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import UserStatusCheck from './components/UserStatusCheck';
 
 function AppRoutes() {
 	const [user, loading, error] = useAuthState(auth);
@@ -26,7 +27,15 @@ function AppRoutes() {
 		<Routes>
 			<Route
 				path="/login"
-				element={!user ? <AuthPage /> : <Navigate to="/user-type-selection" />}
+				element={!user ? <AuthPage /> : <Navigate to="/status-check" />}
+			/>
+			<Route
+				path="/status-check"
+				element={
+					<ProtectedRoute>
+						<UserStatusCheck />
+					</ProtectedRoute>
+				}
 			/>
 			<Route
 				path="/user-type-selection"
@@ -58,7 +67,7 @@ function AppRoutes() {
 			/>
 			<Route
 				path="*"
-				element={<Navigate to={user ? '/user-type-selection' : '/login'} />}
+				element={<Navigate to={user ? '/status-check' : '/login'} />}
 			/>
 		</Routes>
 	);

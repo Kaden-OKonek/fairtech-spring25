@@ -1,23 +1,61 @@
-import React, { createContext, useState, useContext, ReactNode } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { auth, db } from '../firebase';
+import { doc, getDoc } from 'firebase/firestore';
 
 type UserType = 'student' | 'teacher' | 'judge' | 'volunteer' | null;
 
 interface UserTypeContextType {
 	userType: UserType;
-	setUserType: (type: UserType) => void;
+	setUserType: React.Dispatch<React.SetStateAction<UserType>>;
+	isRegistrationComplete: boolean;
+	setIsRegistrationComplete: React.Dispatch<React.SetStateAction<boolean>>;
+	checkRegistrationStatus: () => Promise<void>;
 }
 
 const UserTypeContext = createContext<UserTypeContextType | undefined>(
 	undefined
 );
 
-export const UserTypeProvider: React.FC<{ children: ReactNode }> = ({
+export const UserTypeProvider: React.FC<{ children: React.ReactNode }> = ({
 	children,
 }) => {
 	const [userType, setUserType] = useState<UserType>(null);
+	const [isRegistrationComplete, setIsRegistrationComplete] =
+		useState<boolean>(false);
+	const [user] = useAuthState(auth);
+
+	const checkRegistrationStatus = async () => {
+		if (user) {
+			const userDoc = await getDoc(doc(db, 'users', user.uid));
+			if (userDoc.exists()) {
+				const userData = userDoc.data();
+				setUserType(userData.userType as UserType);
+				setIsRegistrationComplete(!!userData.registrationComplete);
+			} else {
+				setUserType(null);
+				setIsRegistrationComplete(false);
+			}
+		} else {
+			setUserType(null);
+			setIsRegistrationComplete(false);
+		}
+	};
+
+	useEffect(() => {
+		checkRegistrationStatus();
+	}, [user]);
 
 	return (
-		<UserTypeContext.Provider value={{ userType, setUserType }}>
+		<UserTypeContext.Provider
+			value={{
+				userType,
+				setUserType,
+				isRegistrationComplete,
+				setIsRegistrationComplete,
+				checkRegistrationStatus,
+			}}
+		>
 			{children}
 		</UserTypeContext.Provider>
 	);
