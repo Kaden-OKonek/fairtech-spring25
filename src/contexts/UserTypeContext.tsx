@@ -6,65 +6,65 @@ import { doc, getDoc } from 'firebase/firestore';
 type UserType = 'student' | 'teacher' | 'judge' | 'volunteer' | null;
 
 interface UserTypeContextType {
-	userType: UserType;
-	setUserType: React.Dispatch<React.SetStateAction<UserType>>;
-	isRegistrationComplete: boolean;
-	setIsRegistrationComplete: React.Dispatch<React.SetStateAction<boolean>>;
-	checkRegistrationStatus: () => Promise<void>;
+  userType: UserType;
+  setUserType: React.Dispatch<React.SetStateAction<UserType>>;
+  isRegistrationComplete: boolean;
+  setIsRegistrationComplete: React.Dispatch<React.SetStateAction<boolean>>;
+  checkRegistrationStatus: () => Promise<void>;
 }
 
 const UserTypeContext = createContext<UserTypeContextType | undefined>(
-	undefined
+  undefined
 );
 
 export const UserTypeProvider: React.FC<{ children: React.ReactNode }> = ({
-	children,
+  children,
 }) => {
-	const [userType, setUserType] = useState<UserType>(null);
-	const [isRegistrationComplete, setIsRegistrationComplete] =
-		useState<boolean>(false);
-	const [user] = useAuthState(auth);
+  const [userType, setUserType] = useState<UserType>(null);
+  const [isRegistrationComplete, setIsRegistrationComplete] =
+    useState<boolean>(false);
+  const [user] = useAuthState(auth);
 
-	const checkRegistrationStatus = async () => {
-		if (user) {
-			const userDoc = await getDoc(doc(db, 'users', user.uid));
-			if (userDoc.exists()) {
-				const userData = userDoc.data();
-				setUserType(userData.userType as UserType);
-				setIsRegistrationComplete(!!userData.registrationComplete);
-			} else {
-				setUserType(null);
-				setIsRegistrationComplete(false);
-			}
-		} else {
-			setUserType(null);
-			setIsRegistrationComplete(false);
-		}
-	};
+  const checkRegistrationStatus = async () => {
+    if (user) {
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        setUserType(userData.userType as UserType);
+        setIsRegistrationComplete(!!userData.registrationComplete);
+      } else {
+        setUserType(null);
+        setIsRegistrationComplete(false);
+      }
+    } else {
+      setUserType(null);
+      setIsRegistrationComplete(false);
+    }
+  };
 
-	useEffect(() => {
-		checkRegistrationStatus();
-	}, [user]);
+  useEffect(() => {
+    checkRegistrationStatus();
+  }, [user]);
 
-	return (
-		<UserTypeContext.Provider
-			value={{
-				userType,
-				setUserType,
-				isRegistrationComplete,
-				setIsRegistrationComplete,
-				checkRegistrationStatus,
-			}}
-		>
-			{children}
-		</UserTypeContext.Provider>
-	);
+  return (
+    <UserTypeContext.Provider
+      value={{
+        userType,
+        setUserType,
+        isRegistrationComplete,
+        setIsRegistrationComplete,
+        checkRegistrationStatus,
+      }}
+    >
+      {children}
+    </UserTypeContext.Provider>
+  );
 };
 
 export const useUserType = () => {
-	const context = useContext(UserTypeContext);
-	if (context === undefined) {
-		throw new Error('useUserType must be used within a UserTypeProvider');
-	}
-	return context;
+  const context = useContext(UserTypeContext);
+  if (context === undefined) {
+    throw new Error('useUserType must be used within a UserTypeProvider');
+  }
+  return context;
 };

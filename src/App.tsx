@@ -12,73 +12,73 @@ import ProtectedRoute from './components/ProtectedRoute';
 import UserStatusCheck from './components/UserStatusCheck';
 
 function AppRoutes() {
-	const [user, loading, error] = useAuthState(auth);
-	const { userType } = useUserType();
+  const [user, loading, error] = useAuthState(auth);
+  const { userType } = useUserType();
 
-	if (loading) {
-		return <div>Loading...</div>;
-	}
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
-	if (error) {
-		return <div>Error: {error.message}</div>;
-	}
+  if (error) {
+    return <div>Error: {error.message}</div>;
+  }
 
-	return (
-		<Routes>
-			<Route
-				path="/login"
-				element={!user ? <AuthPage /> : <Navigate to="/status-check" />}
-			/>
-			<Route
-				path="/status-check"
-				element={
-					<ProtectedRoute>
-						<UserStatusCheck />
-					</ProtectedRoute>
-				}
-			/>
-			<Route
-				path="/user-type-selection"
-				element={
-					<ProtectedRoute>
-						<UserTypeSelection />
-					</ProtectedRoute>
-				}
-			/>
-			<Route
-				path="/student-registration"
-				element={
-					<ProtectedRoute>
-						{userType === 'student' ? (
-							<StudentRegistration />
-						) : (
-							<Navigate to="/user-type-selection" />
-						)}
-					</ProtectedRoute>
-				}
-			/>
-			<Route
-				path="/stud_dashboard"
-				element={
-					<ProtectedRoute>
-						<StudentDashboard />
-					</ProtectedRoute>
-				}
-			/>
-			<Route
-				path="*"
-				element={<Navigate to={user ? '/status-check' : '/login'} />}
-			/>
-		</Routes>
-	);
+  return (
+    <Routes>
+      <Route
+        path="/login"
+        element={!user ? <AuthPage /> : <Navigate to="/status-check" />}
+      />
+      <Route
+        path="/status-check"
+        element={
+          <ProtectedRoute>
+            <UserStatusCheck />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/user-type-selection"
+        element={
+          <ProtectedRoute>
+            <UserTypeSelection />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/student-registration"
+        element={
+          <ProtectedRoute>
+            {userType === 'student' ? (
+              <StudentRegistration />
+            ) : (
+              <Navigate to="/user-type-selection" />
+            )}
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/stud_dashboard"
+        element={
+          <ProtectedRoute>
+            <StudentDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="*"
+        element={<Navigate to={user ? '/status-check' : '/login'} />}
+      />
+    </Routes>
+  );
 }
 
 function App() {
-	return (
-		<UserTypeProvider>
-			<AppRoutes />
-		</UserTypeProvider>
-	);
+  return (
+    <UserTypeProvider>
+      <AppRoutes />
+    </UserTypeProvider>
+  );
 }
 
 export default App;
