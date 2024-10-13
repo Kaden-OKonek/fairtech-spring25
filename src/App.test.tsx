@@ -28,7 +28,6 @@ jest.mock('firebase/functions', () => ({
 // Mock the Firebase app
 jest.mock('./firebase', () => ({
 	auth: jest.fn(),
-	functions: jest.fn(),
 }));
 
 // Mock useNavigate
