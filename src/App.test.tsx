@@ -20,11 +20,6 @@ jest.mock('firebase/auth', () => ({
 	GoogleAuthProvider: jest.fn(),
 }));
 
-// Mock Firebase functions
-jest.mock('firebase/functions', () => ({
-	httpsCallable: jest.fn(),
-}));
-
 // Mock the Firebase app
 jest.mock('./firebase', () => ({
 	auth: jest.fn(),

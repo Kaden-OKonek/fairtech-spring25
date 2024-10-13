@@ -8,8 +8,11 @@ import {
 	ListItemText,
 } from '@mui/material';
 import LogoutButton from '../components/LogoutButton';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
 const StudentDashboard: React.FC = () => {
+	const navigate = useNavigate(); // Initialize navigate function
+
 	return (
 		<Box sx={{ display: 'flex', minHeight: '100vh' }}>
 			{/* Sidebar */}
@@ -29,10 +32,11 @@ const StudentDashboard: React.FC = () => {
 						Hi Student
 					</Typography>
 					<List>
-						<ListItem component="button">
-							<ListItemText primary="My Projects" />
-						</ListItem>
-						<ListItem component="button">
+						<ListItem
+							component="button"
+							onClick={() => navigate('/upload-pdf')}
+						>
+							{/* Navigate to the PDF upload page */}
 							<ListItemText primary="Paperwork" />
 							<Box
 								sx={{
@@ -49,6 +53,9 @@ const StudentDashboard: React.FC = () => {
 							>
 								1
 							</Box>
+						</ListItem>
+						<ListItem component="button">
+							<ListItemText primary="My Projects" />
 						</ListItem>
 						<ListItem component="button">
 							<ListItemText primary="Account Settings" />
