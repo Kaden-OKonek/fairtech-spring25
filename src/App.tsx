@@ -10,6 +10,7 @@ import StudentRegistration from './components/StudentRegistration';
 import { UserTypeProvider, useUserType } from './contexts/UserTypeContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import UserStatusCheck from './components/UserStatusCheck';
+import UploadPDF from './pages/UploadPDF';
 
 function AppRoutes() {
   const [user, loading, error] = useAuthState(auth);
@@ -62,6 +63,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <StudentDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/upload-pdf"
+        element={
+          <ProtectedRoute>
+            <UploadPDF />
           </ProtectedRoute>
         }
       />

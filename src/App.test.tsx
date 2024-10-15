@@ -25,6 +25,13 @@ jest.mock('./firebase', () => ({
   auth: jest.fn(),
 }));
 
+jest.mock('firebase/storage', () => ({
+  getStorage: jest.fn(),
+  ref: jest.fn(),
+  uploadBytes: jest.fn(),
+  getDownloadURL: jest.fn(),
+}));
+
 // Mock useNavigate
 const mockedUseNavigate = jest.fn();
 jest.mock('react-router-dom', () => ({
