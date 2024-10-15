@@ -5,12 +5,13 @@ import AuthPage from './pages/AuthPage';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from './firebase';
 import StudentDashboard from './pages/StudentDashboard';
-import UserTypeSelection from './components/UserTypeSelection';
-import StudentRegistration from './components/StudentRegistration';
+import UserTypeSelection from './pages/UserTypeSelection';
+import StudentRegistration from './pages/StudentRegistration';
 import { UserTypeProvider, useUserType } from './contexts/UserTypeContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import UserStatusCheck from './components/UserStatusCheck';
 import UploadPDF from './pages/UploadPDF';
+import LandingPage from './pages/LandingPage';
 
 function AppRoutes() {
   const [user, loading, error] = useAuthState(auth);
@@ -26,6 +27,7 @@ function AppRoutes() {
 
   return (
     <Routes>
+      <Route path="/" element={<LandingPage />} />
       <Route
         path="/login"
         element={!user ? <AuthPage /> : <Navigate to="/status-check" />}
@@ -74,10 +76,7 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
-      <Route
-        path="*"
-        element={<Navigate to={user ? '/status-check' : '/login'} />}
-      />
+      <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );
 }

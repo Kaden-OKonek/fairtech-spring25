@@ -56,31 +56,20 @@ describe('App', () => {
     mockedUseNavigate.mockReset();
   });
 
-  test('renders login and signup tabs when not authenticated', async () => {
+  test('renders landing page when not authenticated', async () => {
     renderWithRouter(<App />);
     await waitFor(() => {
-      const loginTab = screen.getByRole('tab', { name: /login/i });
-      const signupTab = screen.getByRole('tab', { name: /sign up/i });
-      expect(loginTab).toBeInTheDocument();
-      expect(signupTab).toBeInTheDocument();
-    });
-  });
-
-  test('renders email and password fields when not authenticated', async () => {
-    renderWithRouter(<App />);
-    await waitFor(() => {
-      const emailField = screen.getByLabelText(/email/i);
-      const passwordField = screen.getByLabelText(/password/i);
-      expect(emailField).toBeInTheDocument();
-      expect(passwordField).toBeInTheDocument();
-    });
-  });
-
-  test('renders login button when not authenticated', async () => {
-    renderWithRouter(<App />);
-    await waitFor(() => {
-      const loginButton = screen.getByRole('button', { name: /login/i });
-      expect(loginButton).toBeInTheDocument();
+      expect(
+        screen.getByText('Welcome to Southern Minnesota Science Fair!')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByAltText('Southern MN Science Fair Logo')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'Why use the Southern Minnesota Science Fair Platform?'
+        )
+      ).toBeInTheDocument();
     });
   });
 
