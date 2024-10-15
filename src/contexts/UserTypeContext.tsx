@@ -1,4 +1,10 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, {
+  createContext,
+  useState,
+  useContext,
+  useEffect,
+  useCallback,
+} from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth, db } from '../firebase';
 import { doc, getDoc } from 'firebase/firestore';
@@ -25,7 +31,7 @@ export const UserTypeProvider: React.FC<{ children: React.ReactNode }> = ({
     useState<boolean>(false);
   const [user] = useAuthState(auth);
 
-  const checkRegistrationStatus = async () => {
+  const checkRegistrationStatus = useCallback(async () => {
     if (user) {
       const userDoc = await getDoc(doc(db, 'users', user.uid));
       if (userDoc.exists()) {
@@ -40,11 +46,11 @@ export const UserTypeProvider: React.FC<{ children: React.ReactNode }> = ({
       setUserType(null);
       setIsRegistrationComplete(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     checkRegistrationStatus();
-  }, [user]);
+  }, [checkRegistrationStatus]);
 
   return (
     <UserTypeContext.Provider
