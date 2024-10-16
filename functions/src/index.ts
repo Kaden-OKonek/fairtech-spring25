@@ -1,19 +1,42 @@
-/**
- * Import function triggers from their respective submodules:
- *
- * import {onCall} from "firebase-functions/v2/https";
- * import {onDocumentWritten} from "firebase-functions/v2/firestore";
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
- */
+import * as functions from 'firebase-functions';
+import { CallableRequest } from 'firebase-functions/v2/https';
+import * as admin from 'firebase-admin';
 
-import {onRequest} from "firebase-functions/v2/https";
-import * as logger from "firebase-functions/logger";
+admin.initializeApp();
 
-// Start writing functions
-// https://firebase.google.com/docs/functions/typescript
+export const checkUserStatus = functions.https.onCall(
+	async (request: CallableRequest) => {
+		const { data, auth } = request;
 
-// export const helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+		if (!auth) {
+			throw new functions.https.HttpsError(
+				'unauthenticated',
+				'User must be authenticated to check status.'
+			);
+		}
+
+		try {
+			const userId = data.userId;
+
+			// Verify that the userId from the request matches the authenticated user
+			if (userId !== auth.uid) {
+				throw new functions.https.HttpsError(
+					'permission-denied',
+					'User can only check their own status.'
+				);
+			}
+
+			const user = await admin.auth().getUser(userId);
+
+			const isActive = user.emailVerified;
+
+			return { isActive };
+		} catch (error) {
+			console.error('Error checking user status:', error);
+			throw new functions.https.HttpsError(
+				'internal',
+				'An error occurred while checking user status'
+			);
+		}
+	}
+);

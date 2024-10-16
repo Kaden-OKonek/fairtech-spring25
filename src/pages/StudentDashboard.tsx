@@ -32,7 +32,10 @@ const StudentDashboard: React.FC = () => {
             Hi Student
           </Typography>
           <List>
-            <ListItem component="button" onClick={() => navigate('/upload-pdf')}>
+            <ListItem
+              component="button"
+              onClick={() => navigate('/upload-pdf')}
+            >
               {/* Navigate to the PDF upload page */}
               <ListItemText primary="Paperwork" />
               <Box

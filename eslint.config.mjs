@@ -1,26 +1,25 @@
-import react from "eslint-plugin-react";
-import typescriptEslint from "@typescript-eslint/eslint-plugin";
-import typescriptParser from "@typescript-eslint/parser";
-import globals from "globals";
-import reactRecommended from "eslint-plugin-react/configs/recommended.js";
+import react from 'eslint-plugin-react';
+import typescriptEslint from '@typescript-eslint/eslint-plugin';
+import typescriptParser from '@typescript-eslint/parser';
+import globals from 'globals';
+import prettierConfig from 'eslint-config-prettier';
+import prettierPlugin from 'eslint-plugin-prettier';
 
 export default [
   {
-    ignores: ["dist/**/*"],
+    ignores: ['dist/**/*'],
   },
   {
-    files: ["**/*.{js,jsx,mjs,cjs,ts,tsx}"],
-    ignores: ["dist/**/*"],
-    ...reactRecommended,
+    files: ['**/*.{js,jsx,mjs,cjs,ts,tsx}'],
+    ignores: ['dist/**/*'],
     settings: {
       react: {
-        version: "detect",
+        version: 'detect',
       },
     },
     languageOptions: {
-      ...reactRecommended.languageOptions,
-      ecmaVersion: "latest",
-      sourceType: "module",
+      ecmaVersion: 'latest',
+      sourceType: 'module',
       parser: typescriptParser,
       parserOptions: {
         ecmaFeatures: {
@@ -33,18 +32,21 @@ export default [
       },
     },
     plugins: {
-      "@typescript-eslint": typescriptEslint,
+      '@typescript-eslint': typescriptEslint,
       react,
+      prettier: prettierPlugin,
     },
     rules: {
-      // TypeScript specific rules
-      "@typescript-eslint/no-unused-vars": "error",
-      "@typescript-eslint/explicit-function-return-type": "warn",
-      "@typescript-eslint/no-explicit-any": "warn",
-      
-      // React specific rules
-      "react/prop-types": "off", // Turn off prop-types as we use TypeScript for type checking
-
+      '@typescript-eslint/no-unused-vars': 'error',
+      'react/prop-types': 'off',
+      'prettier/prettier': ['error', {}, { usePrettierrc: true }],
+      indent: ['error', 2],
+      'max-len': ['error', { code: 100 }],
+      'no-multiple-empty-lines': ['error', { max: 1, maxEOF: 0 }],
+      'object-curly-spacing': ['error', 'always'],
+      'array-bracket-spacing': ['error', 'never'],
+      'comma-dangle': ['error', 'always-multiline'],
     },
   },
+  prettierConfig,
 ];
