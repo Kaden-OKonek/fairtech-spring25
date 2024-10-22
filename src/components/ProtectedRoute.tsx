@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../firebase';
-import { sendEmailVerification, User } from 'firebase/auth';
+import { sendEmailVerification, User, onAuthStateChanged } from 'firebase/auth';
 import {
   Box,
   Typography,
@@ -26,11 +26,31 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     'success'
   );
 
+  useEffect(() => {
+    let unsubscribe = () => {};
+
+    if (user) {
+      unsubscribe = onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          try {
+            await user.reload();
+          } catch (error) {
+            console.error('Error refreshing user:', error);
+          }
+        }
+      });
+    }
+
+    return () => unsubscribe();
+  }, [user]); // Added user to dependency array
+
   const handleSendVerificationEmail = async (user: User) => {
     setIsSendingEmail(true);
     try {
       await sendEmailVerification(user);
-      setSnackbarMessage('Verification email sent. Please check your inbox.');
+      setSnackbarMessage(
+        'Verification email sent! Please check your inbox and click the verification link.'
+      );
       setSnackbarSeverity('success');
     } catch (error) {
       console.error('Error sending verification email:', error);
@@ -74,19 +94,24 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
             Email Verification Required
           </Typography>
           <Typography variant="body1" paragraph align="center">
-            Please verify your email address to access this page.
+            Please check your email and click the verification link. After
+            verifying, click the button below to continue.
           </Typography>
-          <Box display="flex" justifyContent="center" mt={2}>
+          <Box display="flex" flexDirection="column" gap={2}>
             <Button
               variant="contained"
               color="primary"
+              onClick={() => window.location.reload()}
+            >
+              I've Verified My Email
+            </Button>
+            <Button
+              variant="outlined"
               onClick={() => handleSendVerificationEmail(user)}
               disabled={isSendingEmail}
             >
               {isSendingEmail ? 'Sending...' : 'Resend Verification Email'}
             </Button>
-          </Box>
-          <Box display="flex" justifyContent="center" mt={2}>
             <Button
               variant="outlined"
               color="secondary"
