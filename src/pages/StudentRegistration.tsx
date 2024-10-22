@@ -100,7 +100,7 @@ const StudentRegistration: React.FC = () => {
 
       console.log('Registration successful');
       setSubmitting(false);
-      navigate('/stud_dashboard');
+      navigate('/student-dashboard');
     } catch (error) {
       console.error('Error during registration:', error);
       setRegistrationError(

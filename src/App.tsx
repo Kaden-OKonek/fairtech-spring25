@@ -5,6 +5,8 @@ import AuthPage from './pages/AuthPage';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from './firebase';
 import StudentDashboard from './pages/StudentDashboard';
+import VolunteerDashboard from './pages/VolunteerDashboard';
+import AdminDashboard from './pages/AdminDashboard';
 import UserTypeSelection from './pages/UserTypeSelection';
 import StudentRegistration from './pages/StudentRegistration';
 import { UserTypeProvider, useUserType } from './contexts/UserTypeContext';
@@ -27,11 +29,16 @@ function AppRoutes() {
 
   return (
     <Routes>
+      {/* Landing page */}
       <Route path="/" element={<LandingPage />} />
+
+      {/* Authentication page */}
       <Route
         path="/login"
         element={!user ? <AuthPage /> : <Navigate to="/status-check" />}
       />
+
+      {/* Status check after login */}
       <Route
         path="/status-check"
         element={
@@ -40,6 +47,8 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
+      {/* User Type Selection page */}
       <Route
         path="/user-type-selection"
         element={
@@ -48,6 +57,8 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
+      {/* Student Registration page */}
       <Route
         path="/student-registration"
         element={
@@ -60,14 +71,42 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
+      {/* Student Dashboard */}
       <Route
-        path="/stud_dashboard"
+        path="/student-dashboard"
         element={
           <ProtectedRoute>
             <StudentDashboard />
           </ProtectedRoute>
         }
       />
+
+      {/* Volunteer Dashboard */}
+      <Route
+        path="/volunteer-dashboard"
+        element={
+          <ProtectedRoute>
+            {userType === 'volunteer' ? (
+              <VolunteerDashboard />
+            ) : (
+              <Navigate to="/user-type-selection" />
+            )}
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Admin Dashboard */}
+      <Route
+        path="/admin-dashboard"
+        element={
+          <ProtectedRoute>
+            <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Upload PDF page */}
       <Route
         path="/upload-pdf"
         element={
@@ -76,6 +115,7 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );

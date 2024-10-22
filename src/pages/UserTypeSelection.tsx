@@ -57,6 +57,8 @@ const UserTypeSelection: React.FC = () => {
 
       if (selectedType === 'student') {
         navigate('/student-registration');
+      } else if (selectedType === 'volunteer') {
+        navigate('/volunteer-dashboard');
       } else {
         alert(`${selectedType} registration is not implemented yet.`);
       }
