@@ -18,10 +18,16 @@ const UserStatusCheck: React.FC = () => {
           const userData = userDoc.data();
           if (!userData.userType) {
             navigate('/user-type-selection');
-          } else if (userData.userType === 'student' && !userData.firstName) {
-            navigate('/student-registration');
-          } else {
-            navigate('/stud_dashboard');
+          } else if (userData.userType === 'student') {
+            if (!userData.firstName) {
+              navigate('/student-registration');
+            } else {
+              navigate('/student-dashboard');
+            }
+          } else if (userData.userType === 'volunteer') {
+            if (!userData.firstname) {
+              navigate('/volunteer-dashboard');
+            }
           }
         } else {
           navigate('/user-type-selection');
