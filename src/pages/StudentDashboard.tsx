@@ -1,26 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { Box } from '@mui/material';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import React, { useState } from 'react';
+import { Box, CircularProgress } from '@mui/material';
 import Sidebar from '../components/student-dashboard/Sidebar';
 import ProjectsContent from '../components/student-dashboard/content/ProjectsContent';
 import PaperworkContent from '../components/student-dashboard/content/PaperworkContent';
 import AccountSettingsContent from '../components/student-dashboard/content/AccountSettingsContent';
 import { ContentType } from '../types/studentDashboard';
+import { useUserData } from '../hooks/useUserData';
 
 const StudentDashboard: React.FC = () => {
   const [activeContent, setActiveContent] = useState<ContentType>('projects');
-  const [userName, setUserName] = useState<string>('');
-
-  useEffect(() => {
-    const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUserName(user.displayName || 'Student');
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
+  const { userName, isLoading } = useUserData();
 
   const renderContent = () => {
     switch (activeContent) {
@@ -34,6 +23,21 @@ const StudentDashboard: React.FC = () => {
         return <ProjectsContent />;
     }
   };
+
+  if (isLoading) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '100vh',
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>

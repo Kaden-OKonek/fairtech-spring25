@@ -90,6 +90,7 @@ const StudentRegistration: React.FC = () => {
           grade: values.grade,
           phone: values.phone,
           address: values.address,
+          email: user.email,
           city: values.city,
           state: values.state,
           zipCode: values.zipCode,
