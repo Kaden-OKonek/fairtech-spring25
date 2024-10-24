@@ -8,12 +8,16 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Paper,
+  AppBar,
+  Toolbar,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useUserType } from '../contexts/UserTypeContext';
 import { doc, setDoc } from 'firebase/firestore';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth, db } from '../firebase';
+import LogoutButton from '../components/LogoutButton';
 
 const userTypes = [
   { label: 'Student', value: 'student' },
@@ -41,7 +45,6 @@ const UserTypeSelection: React.FC = () => {
     }
 
     try {
-      // Save user type to Firestore
       await setDoc(
         doc(db, 'users', user.uid),
         {
@@ -76,23 +79,38 @@ const UserTypeSelection: React.FC = () => {
   };
 
   return (
-    <Box sx={{ maxWidth: 400, margin: 'auto', mt: 4, textAlign: 'center' }}>
-      <Typography variant="h5" gutterBottom>
-        Select User Type
-      </Typography>
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
-        Please choose your role carefully. This cannot be changed later.
-      </Typography>
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
-        {userTypes.map((type) => (
-          <Button
-            key={type.value}
-            variant="contained"
-            onClick={() => handleUserTypeSelection(type.value)}
+    <>
+      <AppBar position="static" color="transparent" elevation={0}>
+        <Toolbar sx={{ justifyContent: 'flex-end' }}>
+          <LogoutButton />
+        </Toolbar>
+      </AppBar>
+      <Box sx={{ maxWidth: 400, margin: 'auto', mt: 4, px: 2 }}>
+        <Paper elevation={3} sx={{ p: 4 }}>
+          <Typography variant="h5" gutterBottom align="center">
+            Select User Type
+          </Typography>
+          <Typography
+            variant="body1"
+            color="text.secondary"
+            sx={{ mb: 4 }}
+            align="center"
           >
-            {type.label}
-          </Button>
-        ))}
+            Please choose your role carefully. This cannot be changed later.
+          </Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {userTypes.map((type) => (
+              <Button
+                key={type.value}
+                variant="contained"
+                size="large"
+                onClick={() => handleUserTypeSelection(type.value)}
+              >
+                {type.label}
+              </Button>
+            ))}
+          </Box>
+        </Paper>
       </Box>
 
       <Dialog
@@ -102,7 +120,7 @@ const UserTypeSelection: React.FC = () => {
         aria-describedby="alert-dialog-description"
       >
         <DialogTitle id="alert-dialog-title">
-          {'Confirm User Type Selection'}
+          Confirm User Type Selection
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
@@ -112,15 +130,13 @@ const UserTypeSelection: React.FC = () => {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCancel} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleConfirm} color="primary" autoFocus>
+          <Button onClick={handleCancel}>Cancel</Button>
+          <Button onClick={handleConfirm} variant="contained" autoFocus>
             Confirm
           </Button>
         </DialogActions>
       </Dialog>
-    </Box>
+    </>
   );
 };
 

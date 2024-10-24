@@ -3,6 +3,7 @@ import { Button } from '@mui/material';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
 import { useNavigate } from 'react-router-dom';
+import { LogoutOutlined } from '@mui/icons-material';
 
 interface LogoutButtonProps {
   variant?: 'text' | 'outlined' | 'contained';
@@ -15,12 +16,14 @@ interface LogoutButtonProps {
     | 'info'
     | 'warning';
   size?: 'small' | 'medium' | 'large';
+  showIcon?: boolean;
 }
 
 const LogoutButton: React.FC<LogoutButtonProps> = ({
-  variant = 'contained',
+  variant = 'outlined',
   color = 'primary',
   size = 'medium',
+  showIcon = true,
 }) => {
   const navigate = useNavigate();
 
@@ -35,7 +38,13 @@ const LogoutButton: React.FC<LogoutButtonProps> = ({
   };
 
   return (
-    <Button variant={variant} color={color} size={size} onClick={handleLogout}>
+    <Button
+      variant={variant}
+      color={color}
+      size={size}
+      onClick={handleLogout}
+      startIcon={showIcon ? <LogoutOutlined /> : undefined}
+    >
       Logout
     </Button>
   );
