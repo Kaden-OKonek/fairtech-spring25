@@ -12,14 +12,11 @@ import {
   AppBar,
   Toolbar,
 } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import { useUserType } from '../contexts/UserTypeContext';
-import { doc, setDoc } from 'firebase/firestore';
-import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth, db } from '../firebase';
+import { useAuth } from '../contexts/AuthContext';
+import { UserRole } from '../types/auth.types';
 import LogoutButton from '../components/LogoutButton';
 
-const userTypes = [
+const userTypes: { label: string; value: UserRole }[] = [
   { label: 'Student', value: 'student' },
   { label: 'Teacher', value: 'teacher' },
   { label: 'Judge', value: 'judge' },
@@ -27,44 +24,21 @@ const userTypes = [
 ];
 
 const UserTypeSelection: React.FC = () => {
-  const navigate = useNavigate();
-  const { setUserType } = useUserType();
-  const [user] = useAuthState(auth);
-  const [selectedType, setSelectedType] = useState<string | null>(null);
+  const { setUserRole, logOut } = useAuth();
+  const [selectedType, setSelectedType] = useState<UserRole>(null);
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
 
-  const handleUserTypeSelection = (userType: string) => {
+  const handleUserTypeSelection = (userType: UserRole) => {
     setSelectedType(userType);
     setOpenConfirmDialog(true);
   };
 
   const handleConfirm = async () => {
-    if (!user || !selectedType) {
-      console.error('No user logged in or no type selected');
-      return;
-    }
+    if (!selectedType) return;
 
     try {
-      await setDoc(
-        doc(db, 'users', user.uid),
-        {
-          userType: selectedType,
-          createdAt: new Date(),
-        },
-        { merge: true }
-      );
-
-      setUserType(
-        selectedType as 'student' | 'teacher' | 'judge' | 'volunteer'
-      );
-
-      if (selectedType === 'student') {
-        navigate('/student-registration');
-      } else if (selectedType === 'volunteer') {
-        navigate('/volunteer-dashboard');
-      } else {
-        alert(`${selectedType} registration is not implemented yet.`);
-      }
+      await setUserRole(selectedType);
+      // The AccessGuard will automatically redirect based on the new state
     } catch (error) {
       console.error('Error saving user type:', error);
       alert('An error occurred. Please try again.');
@@ -73,16 +47,11 @@ const UserTypeSelection: React.FC = () => {
     setOpenConfirmDialog(false);
   };
 
-  const handleCancel = () => {
-    setOpenConfirmDialog(false);
-    setSelectedType(null);
-  };
-
   return (
     <>
       <AppBar position="static" color="transparent" elevation={0}>
         <Toolbar sx={{ justifyContent: 'flex-end' }}>
-          <LogoutButton />
+          <LogoutButton onClick={logOut} />
         </Toolbar>
       </AppBar>
       <Box sx={{ maxWidth: 400, margin: 'auto', mt: 4, px: 2 }}>
@@ -115,22 +84,21 @@ const UserTypeSelection: React.FC = () => {
 
       <Dialog
         open={openConfirmDialog}
-        onClose={handleCancel}
+        onClose={() => setOpenConfirmDialog(false)}
         aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
       >
         <DialogTitle id="alert-dialog-title">
           Confirm User Type Selection
         </DialogTitle>
         <DialogContent>
-          <DialogContentText id="alert-dialog-description">
+          <DialogContentText>
             You have selected <strong>{selectedType}</strong> as your user type.
             This choice cannot be changed later. Are you sure you want to
             proceed?
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCancel}>Cancel</Button>
+          <Button onClick={() => setOpenConfirmDialog(false)}>Cancel</Button>
           <Button onClick={handleConfirm} variant="contained" autoFocus>
             Confirm
           </Button>

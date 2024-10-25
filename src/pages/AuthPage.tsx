@@ -13,18 +13,11 @@ import {
   ListItemText,
   Collapse,
 } from '@mui/material';
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signInWithPopup,
-  GoogleAuthProvider,
-  sendEmailVerification,
-  AuthError,
-} from 'firebase/auth';
+import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { auth } from '../firebase';
-import { useNavigate } from 'react-router-dom';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import { useAuth } from '../contexts/AuthContext';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -34,7 +27,6 @@ interface TabPanelProps {
 
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
-
   return (
     <div
       role="tabpanel"
@@ -57,7 +49,7 @@ const AuthPage: React.FC = () => {
   const [message, setMessage] = useState('');
   const [showPasswordRequirements, setShowPasswordRequirements] =
     useState(false);
-  const navigate = useNavigate();
+  const { signIn, signUp } = useAuth();
 
   const [passwordRequirements, setPasswordRequirements] = useState({
     length: false,
@@ -81,21 +73,17 @@ const AuthPage: React.FC = () => {
     setShowPasswordRequirements(false);
   };
 
-  const handleSuccessfulAuth = (): void => {
-    navigate('/status-check');
-  };
-
-  const handleLogin = async (e: React.FormEvent): Promise<void> => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      handleSuccessfulAuth();
+      await signIn(email, password);
+      // AuthContext will handle the navigation based on user state
     } catch (error) {
-      handleAuthError(error as AuthError);
+      setError('Invalid email or password');
     }
   };
 
-  const handleSignup = async (e: React.FormEvent): Promise<void> => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirmPassword) {
       setError("Passwords don't match.");
@@ -106,50 +94,23 @@ const AuthPage: React.FC = () => {
       return;
     }
     try {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-      await sendEmailVerification(userCredential.user);
+      await signUp(email, password);
       setMessage(
-        'A verification email has been sent. Please check your inbox and verify your email to activate your account.'
+        'A verification email has been sent. Please check your inbox.'
       );
     } catch (error) {
-      handleAuthError(error as AuthError);
+      setError('Registration failed. Please try again.');
     }
   };
 
-  const handleGoogleSignIn = async (): Promise<void> => {
-    const provider = new GoogleAuthProvider();
+  const handleGoogleSignIn = async () => {
     try {
+      const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
-      handleSuccessfulAuth();
+      // AuthContext will handle the navigation based on user state
     } catch (error) {
-      handleAuthError(error as AuthError);
+      setError('Google sign-in failed');
     }
-  };
-
-  const handleAuthError = (error: AuthError) => {
-    switch (error.code) {
-      case 'auth/email-already-in-use':
-        setError('This email is already in use. Please try another one.');
-        break;
-      case 'auth/invalid-email':
-        setError('Invalid email address. Please check and try again.');
-        break;
-      case 'auth/weak-password':
-        setError('Password is too weak. Please choose a stronger password.');
-        break;
-      case 'auth/user-not-found':
-      case 'auth/wrong-password':
-        setError('Invalid email or password. Please try again.');
-        break;
-      default:
-        setError('An error occurred. Please try again.');
-        break;
-    }
-    console.error(error);
   };
 
   const checkPasswordRequirements = (password: string) => {

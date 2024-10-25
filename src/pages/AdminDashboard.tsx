@@ -3,9 +3,6 @@ import {
   Box,
   Button,
   Typography,
-  List,
-  ListItem,
-  ListItemText,
   Table,
   TableBody,
   TableCell,
@@ -15,9 +12,12 @@ import {
   Paper,
   ButtonGroup,
   Link,
+  List,
+  ListItem,
+  ListItemText,
 } from '@mui/material';
 import LogoutButton from '../components/LogoutButton';
-//import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useAuth } from '../contexts/AuthContext';
 
 interface StudentForm {
   id: number;
@@ -27,9 +27,10 @@ interface StudentForm {
 }
 
 const AdminDashboard: React.FC = () => {
-  //const navigate = useNavigate(); // Initialize navigate function
+  const { authStatus } = useAuth();
+  const userName = authStatus.metadata?.firstName || 'Admin';
 
-  const initialForms: StudentForm[] = [
+  const [forms, setForms] = useState<StudentForm[]>([
     {
       id: 1,
       studentName: 'Smith, Alice',
@@ -67,9 +68,8 @@ const AdminDashboard: React.FC = () => {
       status: 'Needs SRC Approval',
     },
     // Add more forms as needed
-  ];
+  ]);
 
-  const [forms, setForms] = useState<StudentForm[]>(initialForms);
   const [sortOrder, setSortOrder] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
@@ -136,7 +136,6 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      {/* Sidebar */}
       <Box
         sx={{
           width: '20%',
@@ -150,7 +149,7 @@ const AdminDashboard: React.FC = () => {
       >
         <Box>
           <Typography variant="h5" gutterBottom>
-            Hi Admin
+            Hi {userName}
           </Typography>
           <List>
             <ListItem component="button">
