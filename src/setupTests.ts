@@ -1,35 +1,64 @@
 import '@testing-library/jest-dom';
 
-// Add TextEncoder and TextDecoder
+// TextEncoder/Decoder polyfill (needed for Firebase)
 const { TextEncoder, TextDecoder } = require('util');
 global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder;
 
-// Mock window.matchMedia
+// Minimal browser API mocks
 Object.defineProperty(window, 'matchMedia', {
-  writable: true,
   value: jest.fn().mockImplementation((query) => ({
     matches: false,
     media: query,
     onchange: null,
-    addListener: jest.fn(),
-    removeListener: jest.fn(),
     addEventListener: jest.fn(),
     removeEventListener: jest.fn(),
-    dispatchEvent: jest.fn(),
   })),
 });
 
-// Mock firebase
+// Simplified Firebase mocks
 jest.mock('firebase/auth', () => ({
-  getAuth: jest.fn(),
-  signInWithEmailAndPassword: jest.fn(),
-  createUserWithEmailAndPassword: jest.fn(),
-  signInWithPopup: jest.fn(),
-  GoogleAuthProvider: jest.fn(),
+  getAuth: jest.fn(() => ({
+    currentUser: null,
+  })),
+  onAuthStateChanged: jest.fn((auth, cb) => {
+    cb(null);
+    return jest.fn();
+  }),
 }));
 
-// Mock firebase hooks
-jest.mock('react-firebase-hooks/auth', () => ({
-  useAuthState: jest.fn(),
+jest.mock('firebase/firestore', () => ({
+  getFirestore: jest.fn(),
+  doc: jest.fn(),
+  getDoc: jest.fn(),
+  setDoc: jest.fn(),
 }));
+
+jest.mock('firebase/storage', () => ({
+  getStorage: jest.fn(),
+  ref: jest.fn(),
+  uploadBytes: jest.fn(),
+  getDownloadURL: jest.fn(),
+}));
+
+jest.mock('firebase/functions', () => ({
+  getFunctions: jest.fn(),
+}));
+
+// Common test utilities
+export const mockAuthContext = {
+  authStatus: {
+    isLoading: false,
+    user: null,
+    error: null,
+    state: 'UNAUTHENTICATED',
+    role: null,
+    metadata: {},
+  },
+  signIn: jest.fn(),
+  signUp: jest.fn(),
+  logOut: jest.fn(),
+  setUserRole: jest.fn(),
+  completeRegistration: jest.fn(),
+  refreshStatus: jest.fn(),
+};

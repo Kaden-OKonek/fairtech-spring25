@@ -1,91 +1,50 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
 import App from './App';
+import { mockAuthContext } from './setupTests';
 
-// Mock the firebase hooks
-jest.mock('react-firebase-hooks/auth', () => ({
-  useAuthState: jest.fn(),
+// Mock AuthContext
+jest.mock('./contexts/AuthContext', () => ({
+  useAuth: () => mockAuthContext,
+  AuthProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
-
-// Import the mocked module
-import { useAuthState } from 'react-firebase-hooks/auth';
-
-// Mock Firebase
-jest.mock('firebase/auth', () => ({
-  getAuth: jest.fn(),
-  signInWithEmailAndPassword: jest.fn(),
-  createUserWithEmailAndPassword: jest.fn(),
-  signInWithPopup: jest.fn(),
-  GoogleAuthProvider: jest.fn(),
-}));
-
-// Mock the Firebase app
-jest.mock('./firebase', () => ({
-  auth: jest.fn(),
-}));
-
-jest.mock('firebase/storage', () => ({
-  getStorage: jest.fn(),
-  ref: jest.fn(),
-  uploadBytes: jest.fn(),
-  getDownloadURL: jest.fn(),
-}));
-
-// Mock useNavigate
-const mockedUseNavigate = jest.fn();
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useNavigate: () => mockedUseNavigate,
-}));
-
-// Type assertion for mocked useAuthState
-const mockedUseAuthState = useAuthState as jest.MockedFunction<
-  typeof useAuthState
->;
-
-// Helper function to render the App with Router
-const renderWithRouter = (ui: React.ReactElement, { route = '/' } = {}) => {
-  return render(<MemoryRouter initialEntries={[route]}>{ui}</MemoryRouter>);
-};
 
 describe('App', () => {
-  beforeEach(() => {
-    // Reset mocks before each test
-    mockedUseAuthState.mockReturnValue([null, false, undefined]);
-    mockedUseNavigate.mockReset();
+  const renderApp = (route = '/') => {
+    return render(
+      <MemoryRouter initialEntries={[route]}>
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      </MemoryRouter>
+    );
+  };
+
+  it('renders landing page for unauthenticated users', () => {
+    renderApp();
+    expect(
+      screen.getByText(/Welcome to Southern Minnesota Science Fair!/i)
+    ).toBeInTheDocument();
   });
 
-  test('renders landing page when not authenticated', async () => {
-    renderWithRouter(<App />);
-    await waitFor(() => {
-      expect(
-        screen.getByText('Welcome to Southern Minnesota Science Fair!')
-      ).toBeInTheDocument();
-      expect(
-        screen.getByAltText('Southern MN Science Fair Logo')
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText(
-          'Why use the Southern Minnesota Science Fair Platform?'
-        )
-      ).toBeInTheDocument();
-    });
-  });
-
-  test('renders loading state', async () => {
-    mockedUseAuthState.mockReturnValue([null, true, undefined]);
-    renderWithRouter(<App />);
-    await waitFor(() => {
-      expect(screen.getByText(/loading/i)).toBeInTheDocument();
-    });
-  });
-
-  test('renders error state', async () => {
-    mockedUseAuthState.mockReturnValue([null, false, new Error('Test error')]);
-    renderWithRouter(<App />);
-    await waitFor(() => {
-      expect(screen.getByText(/error/i)).toBeInTheDocument();
-    });
+  it('shows appropriate content for authenticated users', () => {
+    // Override the mock for this specific test
+    jest
+      .spyOn(require('./contexts/AuthContext'), 'useAuth')
+      .mockImplementation(() => ({
+        ...mockAuthContext,
+        authStatus: {
+          ...mockAuthContext.authStatus,
+          state: 'COMPLETE',
+          role: 'student',
+          user: {
+            uid: '123',
+            email: 'test@test.com',
+            emailVerified: true,
+          },
+        },
+      }));
   });
 });

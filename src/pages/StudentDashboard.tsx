@@ -5,11 +5,11 @@ import ProjectsContent from '../components/student-dashboard/content/ProjectsCon
 import PaperworkContent from '../components/student-dashboard/content/PaperworkContent';
 import AccountSettingsContent from '../components/student-dashboard/content/AccountSettingsContent';
 import { ContentType } from '../types/studentDashboard';
-import { useUserData } from '../hooks/useUserData';
+import { useAuth } from '../contexts/AuthContext';
 
 const StudentDashboard: React.FC = () => {
   const [activeContent, setActiveContent] = useState<ContentType>('projects');
-  const { userName, isLoading } = useUserData();
+  const { authStatus } = useAuth();
 
   const renderContent = () => {
     switch (activeContent) {
@@ -24,7 +24,7 @@ const StudentDashboard: React.FC = () => {
     }
   };
 
-  if (isLoading) {
+  if (authStatus.isLoading) {
     return (
       <Box
         sx={{
@@ -42,7 +42,6 @@ const StudentDashboard: React.FC = () => {
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
       <Sidebar
-        userName={userName}
         activeContent={activeContent}
         onContentChange={setActiveContent}
       />

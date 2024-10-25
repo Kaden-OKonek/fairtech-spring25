@@ -15,15 +15,12 @@ import {
   StepLabel,
   useTheme,
   useMediaQuery,
+  Alert,
 } from '@mui/material';
 import { styled } from '@mui/system';
-import { useNavigate } from 'react-router-dom';
-import { doc, setDoc } from 'firebase/firestore';
-import { db } from '../firebase';
-import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth } from '../firebase';
-import { useUserType } from '../contexts/UserTypeContext';
+import { useAuth } from '../contexts/AuthContext';
 import LogoutButton from '../components/LogoutButton';
+import { StudentProfile } from '../types/auth.types';
 
 const validationSchema = Yup.object().shape({
   firstName: Yup.string().required('First name is required'),
@@ -57,10 +54,20 @@ const StyledForm = styled(Form)({
   gap: '1rem',
 });
 
+interface RegistrationData {
+  firstName: string;
+  lastName: string;
+  school: string;
+  grade: string;
+  phone: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+}
+
 const StudentRegistration: React.FC = () => {
-  const navigate = useNavigate();
-  const [user] = useAuthState(auth);
-  const { userType } = useUserType();
+  const { authStatus, completeRegistration } = useAuth();
   const [registrationError, setRegistrationError] = useState<string | null>(
     null
   );
@@ -69,51 +76,46 @@ const StudentRegistration: React.FC = () => {
   const [activeStep, setActiveStep] = useState(0);
   const steps = ['Personal Info', 'Contact Info', 'School Info'];
 
-  const handleSubmit = async (values: any, { setSubmitting }: any) => {
-    if (!user) {
-      setRegistrationError('User not authenticated');
-      setSubmitting(false);
-      return;
-    }
+  const initialValues: RegistrationData = {
+    firstName: '',
+    lastName: '',
+    school: '',
+    grade: '',
+    phone: '',
+    address: '',
+    city: '',
+    state: '',
+    zipCode: '',
+  };
 
-    if (userType !== 'student') {
-      setRegistrationError('Invalid user type');
-      setSubmitting(false);
-      return;
-    }
-
+  const handleSubmit = async (
+    values: RegistrationData,
+    { setSubmitting }: any
+  ) => {
     try {
-      // Update the user document in Firestore
-      await setDoc(
-        doc(db, 'users', user.uid),
-        {
-          firstName: values.firstName,
-          lastName: values.lastName,
-          school: values.school,
-          grade: values.grade,
-          phone: values.phone,
-          address: values.address,
-          email: user.email,
-          city: values.city,
-          state: values.state,
-          zipCode: values.zipCode,
-          updatedAt: new Date(),
-        },
-        { merge: true }
-      );
+      setRegistrationError(null);
 
-      console.log('Registration successful');
-      setSubmitting(false);
-      navigate('/student-dashboard');
+      if (!authStatus.user) {
+        throw new Error('User not authenticated');
+      }
+
+      const registrationData: Partial<StudentProfile> = {
+        ...values,
+        userType: 'student' as const,
+        updatedAt: new Date(),
+        registrationComplete: true,
+        grade: parseInt(values.grade, 10), // Convert string to number
+      };
+
+      await completeRegistration(registrationData);
     } catch (error) {
-      console.error('Error during registration:', error);
+      console.error('Registration error:', error);
       setRegistrationError(
         'An error occurred during registration. Please try again.'
       );
       setSubmitting(false);
     }
   };
-
   return (
     <>
       <AppBar position="static" color="transparent" elevation={0}>
@@ -127,7 +129,7 @@ const StudentRegistration: React.FC = () => {
       <Box sx={{ maxWidth: 600, margin: 'auto', mt: 4, px: 2 }}>
         <StyledPaper elevation={3}>
           <Typography variant="h4" gutterBottom align="center" color="primary">
-            Student Registration
+            Complete Your Registration
           </Typography>
 
           <Stepper
@@ -144,23 +146,13 @@ const StudentRegistration: React.FC = () => {
           </Stepper>
 
           {registrationError && (
-            <Typography color="error" sx={{ mb: 2 }}>
+            <Alert severity="error" sx={{ mb: 2 }}>
               {registrationError}
-            </Typography>
+            </Alert>
           )}
 
           <Formik
-            initialValues={{
-              firstName: '',
-              lastName: '',
-              school: '',
-              grade: '',
-              phone: '',
-              address: '',
-              city: '',
-              state: '',
-              zipCode: '',
-            }}
+            initialValues={initialValues}
             validationSchema={validationSchema}
             onSubmit={handleSubmit}
           >
@@ -173,7 +165,7 @@ const StudentRegistration: React.FC = () => {
                       fullWidth
                       name="firstName"
                       label="First Name"
-                      error={touched.firstName && errors.firstName}
+                      error={touched.firstName && Boolean(errors.firstName)}
                       helperText={touched.firstName && errors.firstName}
                     />
                     <Field
@@ -181,7 +173,7 @@ const StudentRegistration: React.FC = () => {
                       fullWidth
                       name="lastName"
                       label="Last Name"
-                      error={touched.lastName && errors.lastName}
+                      error={touched.lastName && Boolean(errors.lastName)}
                       helperText={touched.lastName && errors.lastName}
                     />
                   </>
@@ -194,7 +186,7 @@ const StudentRegistration: React.FC = () => {
                       fullWidth
                       name="phone"
                       label="Phone Number"
-                      error={touched.phone && errors.phone}
+                      error={touched.phone && Boolean(errors.phone)}
                       helperText={touched.phone && errors.phone}
                     />
                     <Field
@@ -202,7 +194,7 @@ const StudentRegistration: React.FC = () => {
                       fullWidth
                       name="address"
                       label="Address"
-                      error={touched.address && errors.address}
+                      error={touched.address && Boolean(errors.address)}
                       helperText={touched.address && errors.address}
                     />
                     <Grid container spacing={2}>
@@ -212,7 +204,7 @@ const StudentRegistration: React.FC = () => {
                           fullWidth
                           name="city"
                           label="City"
-                          error={touched.city && errors.city}
+                          error={touched.city && Boolean(errors.city)}
                           helperText={touched.city && errors.city}
                         />
                       </Grid>
@@ -222,7 +214,7 @@ const StudentRegistration: React.FC = () => {
                           fullWidth
                           name="state"
                           label="State"
-                          error={touched.state && errors.state}
+                          error={touched.state && Boolean(errors.state)}
                           helperText={touched.state && errors.state}
                         />
                       </Grid>
@@ -232,7 +224,7 @@ const StudentRegistration: React.FC = () => {
                           fullWidth
                           name="zipCode"
                           label="Zip Code"
-                          error={touched.zipCode && errors.zipCode}
+                          error={touched.zipCode && Boolean(errors.zipCode)}
                           helperText={touched.zipCode && errors.zipCode}
                         />
                       </Grid>
@@ -247,7 +239,7 @@ const StudentRegistration: React.FC = () => {
                       fullWidth
                       name="school"
                       label="School"
-                      error={touched.school && errors.school}
+                      error={touched.school && Boolean(errors.school)}
                       helperText={touched.school && errors.school}
                     />
                     <Field
@@ -256,7 +248,7 @@ const StudentRegistration: React.FC = () => {
                       name="grade"
                       label="Grade"
                       type="number"
-                      error={touched.grade && errors.grade}
+                      error={touched.grade && Boolean(errors.grade)}
                       helperText={touched.grade && errors.grade}
                     />
                   </>
@@ -284,7 +276,7 @@ const StudentRegistration: React.FC = () => {
                       color="primary"
                       disabled={isSubmitting}
                     >
-                      Submit
+                      {isSubmitting ? 'Submitting...' : 'Complete Registration'}
                     </Button>
                   ) : (
                     <Button

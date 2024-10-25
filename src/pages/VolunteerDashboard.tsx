@@ -1,21 +1,30 @@
 import React from 'react';
 import {
   Box,
-  Button,
   Typography,
   List,
   ListItem,
   ListItemText,
+  Button,
 } from '@mui/material';
 import LogoutButton from '../components/LogoutButton';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useAuth } from '../contexts/AuthContext';
 
 const VolunteerDashboard: React.FC = () => {
-  const navigate = useNavigate(); // Initialize navigate function
+  const { authStatus, setUserRole } = useAuth();
+  const userName = authStatus.metadata?.firstName || 'Volunteer';
+
+  const handleAdminPromotion = async () => {
+    try {
+      await setUserRole('admin');
+      // AccessGuard will handle navigation
+    } catch (error) {
+      console.error('Error promoting to admin:', error);
+    }
+  };
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      {/* Sidebar */}
       <Box
         sx={{
           width: '20%',
@@ -29,13 +38,13 @@ const VolunteerDashboard: React.FC = () => {
       >
         <Box>
           <Typography variant="h5" gutterBottom>
-            Hi Volunteer
+            Hi {userName}
           </Typography>
           <List>
-            <ListItem component="button">
+            <ListItem>
               <ListItemText primary="Volunteer Information" />
             </ListItem>
-            <ListItem component="button">
+            <ListItem>
               <ListItemText primary="Account Settings" />
             </ListItem>
           </List>
@@ -43,7 +52,6 @@ const VolunteerDashboard: React.FC = () => {
         <LogoutButton variant="outlined" color="inherit" />
       </Box>
 
-      {/* Main content area */}
       <Box sx={{ flexGrow: 1, padding: 4 }}>
         <Typography variant="h4" gutterBottom>
           Volunteer Homepage
@@ -53,7 +61,7 @@ const VolunteerDashboard: React.FC = () => {
           <Button
             variant="outlined"
             sx={{ borderColor: '#512da8', color: '#512da8' }}
-            onClick={() => navigate('/admin-dashboard')}
+            onClick={handleAdminPromotion}
           >
             Click to be promoted to Admin (test feature)
           </Button>

@@ -1,9 +1,7 @@
 import React from 'react';
 import { Button } from '@mui/material';
-import { signOut } from 'firebase/auth';
-import { auth } from '../firebase';
-import { useNavigate } from 'react-router-dom';
 import { LogoutOutlined } from '@mui/icons-material';
+import { useAuth } from '../contexts/AuthContext';
 
 interface LogoutButtonProps {
   variant?: 'text' | 'outlined' | 'contained';
@@ -17,6 +15,7 @@ interface LogoutButtonProps {
     | 'warning';
   size?: 'small' | 'medium' | 'large';
   showIcon?: boolean;
+  onClick?: () => void;
 }
 
 const LogoutButton: React.FC<LogoutButtonProps> = ({
@@ -24,14 +23,15 @@ const LogoutButton: React.FC<LogoutButtonProps> = ({
   color = 'primary',
   size = 'medium',
   showIcon = true,
+  onClick,
 }) => {
-  const navigate = useNavigate();
+  const { logOut } = useAuth();
 
   const handleLogout = async () => {
     try {
-      await signOut(auth);
-      console.log('User signed out successfully');
-      navigate('/'); // Redirect to the login page after logout
+      await logOut();
+      onClick?.();
+      // AccessGuard will handle navigation
     } catch (error) {
       console.error('Error signing out:', error);
     }
