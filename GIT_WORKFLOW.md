@@ -112,7 +112,9 @@ git pull origin main
 
 ## Handling Merge Conflicts
 
-If you encounter merge conflicts:
+If you encounter merge conflicts, you can resolve them using either merge or rebase:
+
+### Merge Approach (Recommended for Beginners)
 
 1. Pull the latest changes from the main branch
 2. Resolve conflicts in your local environment
@@ -121,7 +123,7 @@ If you encounter merge conflicts:
 5. Push the changes to your feature branch
 
 ```bash
-git checkout main
+checkout main
 git pull origin main
 git checkout your-feature-branch
 git merge main
@@ -130,3 +132,25 @@ git add .
 git commit -m "Resolve merge conflicts"
 git push origin your-feature-branch
 ```
+
+### Rebase Approach (Cleaner History)
+
+1. Pull the latest changes from the main branch
+2. Rebase your feature branch onto main
+3. Resolve conflicts in your local environment
+4. Stage the resolved files
+5. Continue the rebase process
+6. Force push the changes to your feature branch
+
+```bash
+checkout main
+git pull origin main
+git checkout your-feature-branch
+git rebase main
+# Resolve conflicts
+git add .
+git rebase --continue
+git push origin your-feature-branch --force
+```
+
+**Note:** Use rebase with caution if others are working on your feature branch, as force pushing rewrites history. If you're unsure, use the merge approach instead.
