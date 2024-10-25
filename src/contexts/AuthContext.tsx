@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from 'react';
 import {
   User,
   onAuthStateChanged,
@@ -41,7 +47,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     return UserState.COMPLETE;
   };
 
-  const updateAuthStatus = async (user: User | null) => {
+  const updateAuthStatus = useCallback(async (user: User | null) => {
     try {
       if (!user) {
         setAuthStatus({
@@ -73,7 +79,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         error: 'Failed to fetch user status',
       }));
     }
-  };
+  }, []); // No dependencies needed as it doesn't use any external values
 
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
@@ -94,7 +100,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         unsubscribe();
       }
     };
-  }, []);
+  }, [updateAuthStatus]);
 
   const signIn = async (email: string, password: string) => {
     try {
