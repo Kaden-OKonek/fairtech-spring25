@@ -95,6 +95,7 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ fileUrl }) => {
             setError('Error loading PDF');
           }}
           style={{ border: 'none' }}
+          title="PDF Document"
         />
       </Box>
     </Paper>

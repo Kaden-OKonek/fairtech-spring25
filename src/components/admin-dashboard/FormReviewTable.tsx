@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Table,
   TableBody,
@@ -16,10 +16,13 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
+  Typography,
+  useTheme,
 } from '@mui/material';
-import { VisibilityOutlined, Edit } from '@mui/icons-material';
+import { Edit } from 'lucide-react';
 import { FormSubmission } from '../../types/forms.types';
 import { formsService } from '../../services/forms.service';
+import { VisibilityOutlined } from '@mui/icons-material';
 
 interface FormReviewTableProps {
   onViewForm: (form: FormSubmission) => void;
@@ -30,6 +33,7 @@ const FormReviewTable: React.FC<FormReviewTableProps> = ({
   onViewForm,
   onEditForm,
 }) => {
+  const theme = useTheme();
   const [forms, setForms] = useState<FormSubmission[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [loading, setLoading] = useState(true);
@@ -96,8 +100,21 @@ const FormReviewTable: React.FC<FormReviewTableProps> = ({
     });
 
   return (
-    <Box sx={{ width: '100%' }}>
-      <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
+    <Box>
+      <Typography variant="h4" gutterBottom color="primary" fontWeight="bold">
+        Form Reviews
+      </Typography>
+
+      <Box
+        sx={{
+          display: 'flex',
+          gap: 2,
+          mb: 3,
+          backgroundColor: 'background.paper',
+          p: 2,
+          borderRadius: theme.shape.borderRadius,
+        }}
+      >
         <TextField
           label="Search"
           variant="outlined"
@@ -122,7 +139,13 @@ const FormReviewTable: React.FC<FormReviewTableProps> = ({
         </FormControl>
       </Box>
 
-      <TableContainer component={Paper}>
+      <TableContainer
+        component={Paper}
+        sx={{
+          boxShadow: theme.shadows[2],
+          borderRadius: 4,
+        }}
+      >
         <Table>
           <TableHead>
             <TableRow>

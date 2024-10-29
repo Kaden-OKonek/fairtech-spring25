@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box } from '@mui/material';
+import { Box, Container } from '@mui/material';
 import Sidebar, {
   AdminContentType,
 } from '../components/admin-dashboard/Sidebar';
@@ -79,13 +79,31 @@ const AdminDashboard: React.FC = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+    <Box
+      sx={{
+        display: 'flex',
+        minHeight: '100vh',
+        backgroundColor: 'background.default',
+      }}
+    >
       <Sidebar
         activeContent={activeContent}
         onContentChange={setActiveContent}
         pendingFormsCount={pendingFormsCount}
       />
-      <Box sx={{ flexGrow: 1, padding: 4 }}>{renderContent()}</Box>
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          backgroundColor: 'background.default',
+          p: 3,
+          minHeight: '100vh',
+        }}
+      >
+        <Container maxWidth="xl">
+          <Box sx={{ py: 2 }}>{renderContent()}</Box>
+        </Container>
+      </Box>
 
       <FormReviewDialog
         open={isReviewDialogOpen}
