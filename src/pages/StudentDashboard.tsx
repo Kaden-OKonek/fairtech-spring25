@@ -5,6 +5,7 @@ import ProjectsContent from '../components/student-dashboard/content/ProjectsCon
 import PaperworkContent from '../components/student-dashboard/content/PaperworkContent';
 import AccountSettingsContent from '../components/student-dashboard/content/AccountSettingsContent';
 import { ContentType } from '../types/studentDashboard';
+import FormQuestions from '../components/student-dashboard/content/FormQuestions';
 import { useAuth } from '../contexts/AuthContext';
 
 const StudentDashboard: React.FC = () => {
@@ -15,6 +16,10 @@ const StudentDashboard: React.FC = () => {
     switch (activeContent) {
       case 'paperwork':
         return <PaperworkContent />;
+      case 'form-questionnaire':
+        return <FormQuestions />; //TODO: the form questions always show up when the button is clicked
+      case 'my-documents':
+        return <div>My Documents Content</div>; // Replace with actual component if available
       case 'projects':
         return <ProjectsContent />;
       case 'settings':

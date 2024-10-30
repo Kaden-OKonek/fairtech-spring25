@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Typography,
@@ -23,6 +23,12 @@ const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const { authStatus } = useAuth();
   const userName = authStatus.metadata?.firstName || 'Student';
+  const [isPaperworkExpanded, setIsPaperworkExpanded] = useState(false);
+
+  const handlePaperworkClick = () => {
+    setIsPaperworkExpanded((prev) => !prev);
+    onContentChange('paperwork'); // Set the main content to Paperwork on click
+  };
 
   return (
     <Box
@@ -41,9 +47,10 @@ const Sidebar: React.FC<SidebarProps> = ({
           Hi {userName}
         </Typography>
         <List>
+          {/* Paperwork Section */}
           <ListItem disablePadding>
             <ListItemButton
-              onClick={() => onContentChange('paperwork')}
+              onClick={handlePaperworkClick}
               selected={activeContent === 'paperwork'}
             >
               <ListItemText primary="Paperwork" />
@@ -59,6 +66,32 @@ const Sidebar: React.FC<SidebarProps> = ({
               />
             </ListItemButton>
           </ListItem>
+
+          {/* Conditionally render sub-buttons if expanded */}
+          {isPaperworkExpanded && (
+            <>
+              <ListItem disablePadding>
+                <ListItemButton
+                  onClick={() => onContentChange('form-questionnaire')}
+                  selected={activeContent === 'form-questionnaire'}
+                  sx={{ pl: 4 }}
+                >
+                  <ListItemText primary="Form Questionnaire" />
+                </ListItemButton>
+              </ListItem>
+              <ListItem disablePadding>
+                <ListItemButton
+                  onClick={() => onContentChange('my-documents')}
+                  selected={activeContent === 'my-documents'}
+                  sx={{ pl: 4 }}
+                >
+                  <ListItemText primary="My Documents" />
+                </ListItemButton>
+              </ListItem>
+            </>
+          )}
+
+          {/* Projects Button */}
           <ListItem disablePadding>
             <ListItemButton
               onClick={() => onContentChange('projects')}
@@ -67,6 +100,8 @@ const Sidebar: React.FC<SidebarProps> = ({
               <ListItemText primary="My Projects" />
             </ListItemButton>
           </ListItem>
+
+          {/* Settings Button */}
           <ListItem disablePadding>
             <ListItemButton
               onClick={() => onContentChange('settings')}

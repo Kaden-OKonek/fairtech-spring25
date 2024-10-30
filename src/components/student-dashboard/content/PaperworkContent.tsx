@@ -8,9 +8,8 @@ import {
   Alert,
 } from '@mui/material';
 import { CloudUpload as CloudUploadIcon } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
-import { getAuth } from 'firebase/auth';
-import { useFormUpload } from '../../../hooks/useFormUpload';
+import { useFileUpload } from '../../../hooks/useFileUpload';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
 const PaperworkContent: React.FC = () => {
   const {
@@ -21,13 +20,12 @@ const PaperworkContent: React.FC = () => {
     submissions,
     handleFileChange,
     handleUpload,
-  } = useFormUpload();
+  } = useFileUpload();
 
-  const navigate = useNavigate();
-  const auth = getAuth();
+  const navigate = useNavigate(); // Initialize useNavigate
 
   const handleGoToQuestionnaire = () => {
-    navigate('/form-questionnaire');
+    navigate('/form-questionnaire'); // Navigate to the Form Questionnaire page
   };
 
   return (
@@ -58,7 +56,7 @@ const PaperworkContent: React.FC = () => {
         <Button
           variant="contained"
           color="primary"
-          onClick={handleGoToQuestionnaire}
+          onClick={handleGoToQuestionnaire} // Add the onClick event
           sx={{
             backgroundColor: '#512da8',
             marginRight: 2,
@@ -78,9 +76,9 @@ const PaperworkContent: React.FC = () => {
         align="center"
         sx={{ marginTop: 1, width: '80%', maxWidth: '500px' }}
       >
-        If your project conditions have changed, you can retake the
+        If your project conditions have changed , you can retake the
         questionnaire anytime by going to the Form Questionnaire under
-        paperwork.
+        paperwork. .
       </Typography>
       <br />
       <br />
@@ -136,8 +134,8 @@ const PaperworkContent: React.FC = () => {
               marginRight: 2,
               fontSize: '1.5rem',
               padding: '12px 24px',
-              width: '50%',
-              height: '70px',
+              width: '100%',
+              height: '100px',
               '&:hover': { backgroundColor: '#4527a0' },
             }}
           >
@@ -160,12 +158,7 @@ const PaperworkContent: React.FC = () => {
         <Button
           variant="contained"
           onClick={handleUpload}
-          disabled={
-            !selectedFile ||
-            isUploading ||
-            !auth.currentUser ||
-            !auth.currentUser.emailVerified
-          }
+          disabled={!selectedFile || isUploading}
           sx={{
             backgroundColor: '#512da8',
             width: '100%',
