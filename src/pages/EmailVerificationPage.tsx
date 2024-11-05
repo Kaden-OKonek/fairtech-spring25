@@ -20,6 +20,7 @@ const EmailVerificationPage: React.FC = () => {
     'success'
   );
   const { authStatus, logOut, refreshStatus } = useAuth();
+  const [cooldownTime, setCooldownTime] = useState<number | null>(null);
 
   const handleSendVerificationEmail = async () => {
     if (!auth.currentUser) return;
@@ -29,15 +30,33 @@ const EmailVerificationPage: React.FC = () => {
       await sendEmailVerification(auth.currentUser);
       setSnackbarMessage('Verification email sent! Please check your inbox.');
       setSnackbarSeverity('success');
-    } catch (error) {
+      // Set cooldown timer for 60 seconds
+      setCooldownTime(60);
+      const timer = setInterval(() => {
+        setCooldownTime((prevTime) => {
+          if (prevTime === null || prevTime <= 1) {
+            clearInterval(timer);
+            return null;
+          }
+          return prevTime - 1;
+        });
+      }, 1000);
+    } catch (error: any) {
       console.error('Error sending verification email:', error);
-      setSnackbarMessage(
-        'Failed to send verification email. Please try again later.'
-      );
+      if (error.code === 'auth/too-many-requests') {
+        setSnackbarMessage(
+          'Too many attempts. Please wait a few minutes before trying again.'
+        );
+      } else {
+        setSnackbarMessage(
+          'Failed to send verification email. Please try again later.'
+        );
+      }
       setSnackbarSeverity('error');
+    } finally {
+      setIsSendingEmail(false);
+      setSnackbarOpen(true);
     }
-    setIsSendingEmail(false);
-    setSnackbarOpen(true);
   };
 
   const handleVerificationCheck = async () => {
@@ -93,9 +112,13 @@ const EmailVerificationPage: React.FC = () => {
           <Button
             variant="outlined"
             onClick={handleSendVerificationEmail}
-            disabled={isSendingEmail}
+            disabled={isSendingEmail || cooldownTime !== null}
           >
-            {isSendingEmail ? 'Sending...' : 'Resend Verification Email'}
+            {isSendingEmail
+              ? 'Sending...'
+              : cooldownTime
+                ? `Resend Available in ${cooldownTime}s`
+                : 'Resend Verification Email'}
           </Button>
           <Button variant="outlined" color="secondary" onClick={logOut}>
             Sign Out
