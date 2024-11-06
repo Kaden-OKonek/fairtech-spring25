@@ -45,8 +45,8 @@ const AccountSettingsContent: React.FC = () => {
   };
 
   return (
-    <Box sx={{ maxWidth: 800, margin: '0 auto' }}>
-      <Typography variant="h4" gutterBottom>
+    <Box sx={{ maxWidth: 800 }}>
+      <Typography variant="h4" gutterBottom color="primary" fontWeight="bold">
         Account Settings
       </Typography>
       <Paper sx={{ p: 3, mt: 2 }}>

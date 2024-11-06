@@ -40,14 +40,16 @@ const PaperworkContent: React.FC = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-      <Typography variant="h4" gutterBottom>
+    <Box sx={{ mb: 4 }}>
+      <Typography variant="h4" gutterBottom color="primary" fontWeight="bold">
         Form Submissions
       </Typography>
 
       {/* Upload Section */}
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <Typography variant="h6">Upload New Form</Typography>
+        <Typography variant="body1" color="text.secondary">
+          Upload New Form
+        </Typography>
         <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
           <Input
             type="file"
@@ -101,7 +103,7 @@ const PaperworkContent: React.FC = () => {
 
       {/* Submissions List */}
       <Box sx={{ mt: 4 }}>
-        <Typography variant="h6" gutterBottom>
+        <Typography variant="body1" gutterBottom color="text.secondary">
           Your Submissions
         </Typography>
         <List>
