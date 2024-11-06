@@ -1,255 +1,247 @@
-import React, { useState } from 'react';
-import { Formik, Form } from 'formik';
+import React, { useState, useEffect } from 'react';
 import {
-  Button,
   Box,
+  Button,
   Typography,
   Paper,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  FormControl,
+  FormLabel,
   Stepper,
   Step,
   StepLabel,
-  useTheme,
-  useMediaQuery,
-  FormControlLabel,
-  Radio,
-  RadioGroup,
-  FormControl,
-  FormLabel,
+  Container,
 } from '@mui/material';
-import { styled } from '@mui/system';
-import { useNavigate } from 'react-router-dom';
-import { doc, setDoc } from 'firebase/firestore';
-import { db } from '../../../firebase';
-import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth } from '../../../firebase';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
-// Define interfaces for our types
-interface FormValues {
+interface FormAnswers {
   humanSubjects: string;
   invertebrates: string;
   biohazards: string;
 }
 
 interface RequiredForms {
-  perPerson: string[];
-  perProject: string[];
+  baseRequired: {
+    perPerson: string[];
+    perProject: string[];
+  };
   conditionalForms: string[];
 }
 
-const StyledPaper = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(3),
-  [theme.breakpoints.up('md')]: {
-    padding: theme.spacing(6),
-  },
-}));
-
-const StyledForm = styled(Form)({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '1rem',
-});
+const STORAGE_KEY = 'formRequirementsAnswers';
 
 const FormRequirementsAssessment: React.FC = () => {
-  const navigate = useNavigate();
-  const [user] = useAuthState(auth);
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const [activeStep, setActiveStep] = useState<number>(0);
-  const [assessmentError, setAssessmentError] = useState<string | null>(null);
+  const [activeStep, setActiveStep] = useState(0);
+  const [showQuestionnaire, setShowQuestionnaire] = useState(true);
+  const [answers, setAnswers] = useState<FormAnswers>({
+    humanSubjects: '',
+    invertebrates: '',
+    biohazards: '',
+  });
 
-  // Define the base required forms
+  useEffect(() => {
+    const savedAnswers = localStorage.getItem(STORAGE_KEY);
+    if (savedAnswers) {
+      const parsedAnswers = JSON.parse(savedAnswers) as FormAnswers;
+      if (Object.values(parsedAnswers).every((answer) => answer)) {
+        setAnswers(parsedAnswers);
+        setShowQuestionnaire(false);
+        setActiveStep(3);
+      }
+    }
+  }, []);
+
+  const questions = [
+    'Does your project involve human subjects in any form (even for feedback)?',
+    'Does your project involve invertebrate animals?',
+    'Does your project involve potential biohazards?',
+  ];
+
   const baseRequiredForms = {
     perPerson: ['Form 1B'],
     perProject: ['Form 1', 'Form 1A', 'Research Plan', 'Abstract'],
   };
 
-  // Questions for the assessment
-  const questions = [
-    'Does your project involve human subjects?',
-    'Does your project involve invertebrate animals?',
-    'Does your project involve potential biohazards?',
-  ];
+  const getRequiredForms = (values: FormAnswers): RequiredForms => {
+    const conditionalForms: string[] = [];
 
-  const handleSubmit = async (values: FormValues): Promise<void> => {
-    if (!user) {
-      setAssessmentError('User not authenticated');
-      return;
-    }
+    if (values.humanSubjects === 'yes') conditionalForms.push('Form 4');
+    if (values.invertebrates === 'yes') conditionalForms.push('Form 6A');
+    if (values.biohazards === 'yes') conditionalForms.push('Form 6B');
 
-    try {
-      // Calculate required forms based on answers
-      const requiredForms: RequiredForms = {
-        ...baseRequiredForms,
-        conditionalForms: [],
-      };
-
-      if (values.humanSubjects === 'yes') {
-        requiredForms.conditionalForms.push('Form 4');
-      }
-
-      if (values.invertebrates === 'yes') {
-        requiredForms.conditionalForms.push('Form 6A');
-      }
-
-      if (values.biohazards === 'yes') {
-        requiredForms.conditionalForms.push('Form 6B');
-      }
-
-      // Store the form requirements in Firestore
-      await setDoc(
-        doc(db, 'projectRequirements', user.uid),
-        {
-          requiredForms,
-          assessmentDate: new Date(),
-          answers: values,
-        },
-        { merge: true }
-      );
-
-      navigate('/forms-dashboard');
-    } catch (error) {
-      console.error('Error saving form requirements:', error);
-      setAssessmentError('An error occurred while saving your requirements.');
-    }
+    return {
+      baseRequired: baseRequiredForms,
+      conditionalForms,
+    };
   };
 
-  const initialValues: FormValues = {
-    humanSubjects: '',
-    invertebrates: '',
-    biohazards: '',
+  const handleNext = (): void => {
+    if (activeStep === questions.length - 1) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(answers));
+      setShowQuestionnaire(false);
+    }
+    setActiveStep((prev) => prev + 1);
   };
+
+  const handleBack = (): void => {
+    setActiveStep((prev) => prev - 1);
+  };
+
+  const handleRetake = (): void => {
+    setShowQuestionnaire(true);
+    setActiveStep(0);
+    setAnswers({
+      humanSubjects: '',
+      invertebrates: '',
+      biohazards: '',
+    });
+    localStorage.removeItem(STORAGE_KEY);
+  };
+
+  const handleRadioChange = (
+    questionKey: keyof FormAnswers,
+    value: string
+  ): void => {
+    setAnswers((prev) => ({
+      ...prev,
+      [questionKey]: value,
+    }));
+  };
+
+  const currentQuestion = Object.keys(answers)[activeStep] as keyof FormAnswers;
+  const requiredForms = getRequiredForms(answers);
+
+  const RequiredFormsDisplay = () => (
+    <Box sx={{ mt: 4 }}>
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h6" gutterBottom>
+          Required Per Person:
+        </Typography>
+        <Box component="ul" sx={{ pl: 2 }}>
+          {requiredForms.baseRequired.perPerson.map((form) => (
+            <Typography component="li" key={form} sx={{ mb: 1 }}>
+              {form}
+            </Typography>
+          ))}
+        </Box>
+      </Box>
+
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h6" gutterBottom>
+          Required Per Project:
+        </Typography>
+        <Box component="ul" sx={{ pl: 2 }}>
+          {requiredForms.baseRequired.perProject.map((form) => (
+            <Typography component="li" key={form} sx={{ mb: 1 }}>
+              {form}
+            </Typography>
+          ))}
+        </Box>
+      </Box>
+
+      {requiredForms.conditionalForms.length > 0 && (
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h6" gutterBottom>
+            Additional Required Forms:
+          </Typography>
+          <Box component="ul" sx={{ pl: 2 }}>
+            {requiredForms.conditionalForms.map((form) => (
+              <Typography component="li" key={form} sx={{ mb: 1 }}>
+                {form}
+              </Typography>
+            ))}
+          </Box>
+        </Box>
+      )}
+
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 4 }}>
+        <Button variant="contained" onClick={handleRetake} color="primary">
+          Retake Questionnaire
+        </Button>
+      </Box>
+    </Box>
+  );
+
+  const QuestionnaireDisplay = () => (
+    <Box sx={{ mt: 4 }}>
+      <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
+        {questions.map((label, index) => (
+          <Step key={label}>
+            <StepLabel
+              StepIconProps={{
+                completed: index < activeStep,
+                icon: index < activeStep ? <CheckCircleIcon /> : index + 1,
+              }}
+            />
+          </Step>
+        ))}
+      </Stepper>
+
+      <FormControl component="fieldset" sx={{ width: '100%', mb: 4 }}>
+        <FormLabel component="legend" sx={{ mb: 2 }}>
+          <Typography variant="h6">{questions[activeStep]}</Typography>
+        </FormLabel>
+        <RadioGroup
+          value={answers[currentQuestion]}
+          onChange={(e) => handleRadioChange(currentQuestion, e.target.value)}
+        >
+          <FormControlLabel
+            value="yes"
+            control={<Radio />}
+            label="Yes"
+            sx={{ mb: 1 }}
+          />
+          <FormControlLabel value="no" control={<Radio />} label="No" />
+        </RadioGroup>
+      </FormControl>
+
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
+        <Button
+          variant="outlined"
+          onClick={handleBack}
+          disabled={activeStep === 0}
+        >
+          Back
+        </Button>
+        <Button
+          variant="contained"
+          onClick={handleNext}
+          disabled={!answers[currentQuestion]}
+        >
+          {activeStep === questions.length - 1 ? 'Submit' : 'Next'}
+        </Button>
+      </Box>
+    </Box>
+  );
 
   return (
-    <Box sx={{ maxWidth: 600, margin: 'auto', mt: 4, px: 2 }}>
-      <StyledPaper elevation={3}>
-        <Typography variant="h4" gutterBottom align="center" color="primary">
-          Form Questionnaire
+    <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
+      <Paper
+        elevation={3}
+        sx={{
+          p: 4,
+          borderRadius: 2,
+        }}
+      >
+        <Typography
+          variant="h4"
+          component="h1"
+          align="center"
+          color="primary"
+          gutterBottom
+        >
+          Form Requirements
         </Typography>
 
-        <Stepper
-          activeStep={activeStep}
-          alternativeLabel={!isMobile}
-          orientation={isMobile ? 'vertical' : 'horizontal'}
-          sx={{ mb: 4 }}
-        >
-          {questions.map((label, index) => (
-            <Step key={index}>
-              <StepLabel>Question {index + 1}</StepLabel>
-            </Step>
-          ))}
-        </Stepper>
-
-        {assessmentError && (
-          <Typography color="error" sx={{ mb: 2 }}>
-            {assessmentError}
-          </Typography>
+        {!showQuestionnaire && activeStep === questions.length ? (
+          <RequiredFormsDisplay />
+        ) : (
+          <QuestionnaireDisplay />
         )}
-
-        <Formik initialValues={initialValues} onSubmit={handleSubmit}>
-          {({ values, setFieldValue }) => (
-            <StyledForm>
-              {activeStep === 0 && (
-                <FormControl component="fieldset">
-                  <FormLabel component="legend">{questions[0]}</FormLabel>
-                  <RadioGroup
-                    name="humanSubjects"
-                    value={values.humanSubjects}
-                    onChange={(e) =>
-                      setFieldValue('humanSubjects', e.target.value)
-                    }
-                  >
-                    <FormControlLabel
-                      value="yes"
-                      control={<Radio />}
-                      label="Yes"
-                    />
-                    <FormControlLabel
-                      value="no"
-                      control={<Radio />}
-                      label="No"
-                    />
-                  </RadioGroup>
-                </FormControl>
-              )}
-
-              {activeStep === 1 && (
-                <FormControl component="fieldset">
-                  <FormLabel component="legend">{questions[1]}</FormLabel>
-                  <RadioGroup
-                    name="invertebrates"
-                    value={values.invertebrates}
-                    onChange={(e) =>
-                      setFieldValue('invertebrates', e.target.value)
-                    }
-                  >
-                    <FormControlLabel
-                      value="yes"
-                      control={<Radio />}
-                      label="Yes"
-                    />
-                    <FormControlLabel
-                      value="no"
-                      control={<Radio />}
-                      label="No"
-                    />
-                  </RadioGroup>
-                </FormControl>
-              )}
-
-              {activeStep === 2 && (
-                <FormControl component="fieldset">
-                  <FormLabel component="legend">{questions[2]}</FormLabel>
-                  <RadioGroup
-                    name="biohazards"
-                    value={values.biohazards}
-                    onChange={(e) =>
-                      setFieldValue('biohazards', e.target.value)
-                    }
-                  >
-                    <FormControlLabel
-                      value="yes"
-                      control={<Radio />}
-                      label="Yes"
-                    />
-                    <FormControlLabel
-                      value="no"
-                      control={<Radio />}
-                      label="No"
-                    />
-                  </RadioGroup>
-                </FormControl>
-              )}
-
-              <Box
-                sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}
-              >
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  disabled={activeStep === 0}
-                  onClick={() => setActiveStep((prev) => prev - 1)}
-                >
-                  Back
-                </Button>
-                {activeStep === questions.length - 1 ? (
-                  <Button type="submit" variant="contained" color="primary">
-                    Submit
-                  </Button>
-                ) : (
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => setActiveStep((prev) => prev + 1)}
-                  >
-                    Next
-                  </Button>
-                )}
-              </Box>
-            </StyledForm>
-          )}
-        </Formik>
-      </StyledPaper>
-    </Box>
+      </Paper>
+    </Container>
   );
 };
 
