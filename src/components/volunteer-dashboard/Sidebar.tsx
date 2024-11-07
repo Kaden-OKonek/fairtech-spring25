@@ -7,16 +7,10 @@ import {
   ListItemButton,
   ListItemText,
   Badge,
-  IconButton,
   useTheme,
   Divider,
 } from '@mui/material';
-import {
-  ClipboardCheck,
-  UserCircle,
-  Settings,
-  ChevronLeft,
-} from 'lucide-react';
+import { ClipboardCheck, UserCircle, Settings } from 'lucide-react';
 import LogoutButton from '../LogoutButton';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -59,9 +53,6 @@ const Sidebar: React.FC<SidebarProps> = ({
         <Typography variant="h5" color="primary" fontWeight="bold">
           Volunteer Portal
         </Typography>
-        <IconButton size="small">
-          <ChevronLeft />
-        </IconButton>
       </Box>
 
       <Divider />

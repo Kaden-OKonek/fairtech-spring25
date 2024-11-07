@@ -7,8 +7,10 @@ import AccessGuard from './components/AccessGuard';
 import AuthPage from './pages/AuthPage';
 import EmailVerificationPage from './pages/EmailVerificationPage';
 import UserTypeSelection from './pages/UserTypeSelection';
+import JudgeRegistration from './pages/JudgeRegistration';
 import StudentRegistration from './pages/StudentRegistration';
 import VolunteerRegistration from './pages/VolunteerRegistration';
+import JudgeDashboard from './pages/JudgeDashboard';
 import StudentDashboard from './pages/StudentDashboard';
 import VolunteerDashboard from './pages/VolunteerDashboard';
 import AdminDashboard from './pages/AdminDashboard';
@@ -59,6 +61,15 @@ function App() {
 
           {/* Role-specific registration routes */}
           <Route
+            path="/judge-registration"
+            element={
+              <AccessGuard>
+                <JudgeRegistration />
+              </AccessGuard>
+            }
+          />
+
+          <Route
             path="/student-registration"
             element={
               <AccessGuard>
@@ -77,6 +88,15 @@ function App() {
           />
 
           {/* Dashboard routes */}
+          <Route
+            path="/judge-dashboard"
+            element={
+              <AccessGuard>
+                <JudgeDashboard />
+              </AccessGuard>
+            }
+          />
+
           <Route
             path="/student-dashboard"
             element={
