@@ -7,11 +7,10 @@ import {
   ListItemButton,
   ListItemText,
   Badge,
-  IconButton,
   useTheme,
   Divider,
 } from '@mui/material';
-import { ClipboardList, Microscope, Settings, ChevronLeft } from 'lucide-react';
+import { ClipboardList, Microscope, Settings } from 'lucide-react';
 import LogoutButton from '../LogoutButton';
 import { StudentContentType } from '../../types/studentDashboard';
 import { useAuth } from '../../contexts/AuthContext';
@@ -53,9 +52,6 @@ const Sidebar: React.FC<SidebarProps> = ({
         <Typography variant="h5" color="primary" fontWeight="bold">
           Student Panel
         </Typography>
-        <IconButton size="small">
-          <ChevronLeft />
-        </IconButton>
       </Box>
 
       <Divider />
