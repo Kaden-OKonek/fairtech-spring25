@@ -4,11 +4,13 @@ import Sidebar from '../components/student-dashboard/Sidebar';
 import ProjectsContent from '../components/student-dashboard/content/ProjectsContent';
 import PaperworkContent from '../components/student-dashboard/content/PaperworkContent';
 import AccountSettingsContent from '../components/student-dashboard/content/AccountSettingsContent';
-import { ContentType } from '../types/studentDashboard';
+import { StudentContentType } from '../types/studentDashboard';
 import { useAuth } from '../contexts/AuthContext';
 
 const StudentDashboard: React.FC = () => {
-  const [activeContent, setActiveContent] = useState<ContentType>('projects');
+  const [activeContent, setActiveContent] =
+    useState<StudentContentType>('projects');
+  const [reviewedFormsCount] = useState(0);
   const { authStatus } = useAuth();
 
   const renderContent = () => {
@@ -44,6 +46,7 @@ const StudentDashboard: React.FC = () => {
       <Sidebar
         activeContent={activeContent}
         onContentChange={setActiveContent}
+        reviewedFormsCount={reviewedFormsCount}
       />
       <Box sx={{ flexGrow: 1, padding: 4 }}>{renderContent()}</Box>
     </Box>

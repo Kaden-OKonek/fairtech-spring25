@@ -11,25 +11,31 @@ import {
   useTheme,
   Divider,
 } from '@mui/material';
-import { ClipboardList, Microscope, Settings, ChevronLeft } from 'lucide-react';
+import {
+  ClipboardCheck,
+  UserCircle,
+  Settings,
+  ChevronLeft,
+} from 'lucide-react';
 import LogoutButton from '../LogoutButton';
-import { StudentContentType } from '../../types/studentDashboard';
 import { useAuth } from '../../contexts/AuthContext';
 
+export type VolunteerContentType = 'tasks' | 'profile' | 'settings';
+
 interface SidebarProps {
-  activeContent: StudentContentType;
-  onContentChange: (content: StudentContentType) => void;
-  reviewedFormsCount: number;
+  activeContent: VolunteerContentType;
+  onContentChange: (content: VolunteerContentType) => void;
+  pendingTasksCount: number;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
   activeContent,
   onContentChange,
-  reviewedFormsCount,
+  pendingTasksCount,
 }) => {
   const theme = useTheme();
   const { authStatus } = useAuth();
-  const userName = authStatus.metadata?.firstName || 'Student';
+  const userName = authStatus.metadata?.firstName || 'Volunteer';
 
   return (
     <Box
@@ -51,7 +57,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         }}
       >
         <Typography variant="h5" color="primary" fontWeight="bold">
-          Student Panel
+          Volunteer Portal
         </Typography>
         <IconButton size="small">
           <ChevronLeft />
@@ -72,8 +78,8 @@ const Sidebar: React.FC<SidebarProps> = ({
       <List sx={{ px: 2, flexGrow: 1 }}>
         <ListItem disablePadding sx={{ mb: 1 }}>
           <ListItemButton
-            onClick={() => onContentChange('paperwork')}
-            selected={activeContent === 'paperwork'}
+            onClick={() => onContentChange('tasks')}
+            selected={activeContent === 'tasks'}
             sx={{
               borderRadius: '12px',
               '&.Mui-selected': {
@@ -84,11 +90,11 @@ const Sidebar: React.FC<SidebarProps> = ({
               },
             }}
           >
-            <ClipboardList size={20} />
-            <ListItemText primary="My Paperwork" sx={{ ml: 2 }} />
-            {reviewedFormsCount > 0 && (
+            <ClipboardCheck size={20} />
+            <ListItemText primary="Tasks" sx={{ ml: 2 }} />
+            {pendingTasksCount > 0 && (
               <Badge
-                badgeContent={reviewedFormsCount}
+                badgeContent={pendingTasksCount}
                 color="error"
                 sx={{
                   '& .MuiBadge-badge': {
@@ -102,8 +108,8 @@ const Sidebar: React.FC<SidebarProps> = ({
 
         <ListItem disablePadding sx={{ mb: 1 }}>
           <ListItemButton
-            onClick={() => onContentChange('projects')}
-            selected={activeContent === 'projects'}
+            onClick={() => onContentChange('profile')}
+            selected={activeContent === 'profile'}
             sx={{
               borderRadius: '12px',
               '&.Mui-selected': {
@@ -114,8 +120,8 @@ const Sidebar: React.FC<SidebarProps> = ({
               },
             }}
           >
-            <Microscope size={20} />
-            <ListItemText primary="My Projects" sx={{ ml: 2 }} />
+            <UserCircle size={20} />
+            <ListItemText primary="Profile" sx={{ ml: 2 }} />
           </ListItemButton>
         </ListItem>
 

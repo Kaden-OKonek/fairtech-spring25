@@ -10,23 +10,25 @@ import {
 
 const ProjectsContent: React.FC = () => (
   <>
-    <Typography variant="h4" gutterBottom>
+    <Typography variant="h4" gutterBottom color="primary" fontWeight="bold">
       My Projects
     </Typography>
 
     <Box sx={{ display: 'flex', gap: 2, marginBottom: 2 }}>
-      <Button variant="contained" sx={{ backgroundColor: '#512da8' }}>
+      <Button variant="contained" sx={{ backgroundColor: 'primary' }}>
         Create a New Project
       </Button>
       <Button
         variant="outlined"
-        sx={{ borderColor: '#512da8', color: '#512da8' }}
+        sx={{ borderColor: 'primary', color: 'primary' }}
       >
         Join an Existing Project
       </Button>
     </Box>
 
-    <Typography variant="body1">2 / 5 Projects</Typography>
+    <Typography variant="body1" color="text.secondary">
+      2 / 5 Projects
+    </Typography>
 
     <Box sx={{ border: '1px solid #ccc', padding: 2, marginTop: 2 }}>
       <List>
