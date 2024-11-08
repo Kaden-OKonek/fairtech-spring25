@@ -131,6 +131,7 @@ const ClassDashboard: React.FC = () => {
                 <img
                   src={images[project.id % images.length]} //This will rotate through the images we have in our image list for UI Design for each row of projects in the table
                   style={{ width: '50px', height: 'auto' }}
+                  alt=""
                 />
 
                 <ListItemText
