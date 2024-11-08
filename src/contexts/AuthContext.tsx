@@ -192,6 +192,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       } else if (userData.userType === 'judge') {
         const judgeRef = doc(db, 'judges', authStatus.user.uid);
         await setDoc(judgeRef, registrationData);
+      } else if (userData.userType === 'teacher') {
+        const teacherRef = doc(db, 'teachers', authStatus.user.uid);
+        await setDoc(teacherRef, registrationData);
       }
 
       await updateAuthStatus(auth.currentUser);

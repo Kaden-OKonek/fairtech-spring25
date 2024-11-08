@@ -118,7 +118,7 @@ const ClassDashboard: React.FC = () => {
 
         {/* All Projects listed under the teacher's class*/}
         <List>
-          {projectsData.length == 0 ? ( //If there are no projects in the class project list, give a small message of encouragment
+          {projectsData.length === 0 ? ( //If there are no projects in the class project list, give a small message of encouragment
             <Typography variant="h5" align="center" sx={{ marginTop: '100px' }}>
               No Projects Currently in Your Class...
               <br />

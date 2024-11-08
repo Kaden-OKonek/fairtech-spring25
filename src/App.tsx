@@ -9,9 +9,11 @@ import EmailVerificationPage from './pages/EmailVerificationPage';
 import UserTypeSelection from './pages/UserTypeSelection';
 import JudgeRegistration from './pages/JudgeRegistration';
 import StudentRegistration from './pages/StudentRegistration';
+import TeacherRegistration from './pages/TeacherRegistration';
 import VolunteerRegistration from './pages/VolunteerRegistration';
 import JudgeDashboard from './pages/JudgeDashboard';
 import StudentDashboard from './pages/StudentDashboard';
+import TeacherDashboard from './pages/TeacherDashboard';
 import VolunteerDashboard from './pages/VolunteerDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import LandingPage from './pages/LandingPage';
@@ -79,6 +81,15 @@ function App() {
           />
 
           <Route
+            path="/teacher-registration"
+            element={
+              <AccessGuard>
+                <TeacherRegistration />
+              </AccessGuard>
+            }
+          />
+
+          <Route
             path="/volunteer-registration"
             element={
               <AccessGuard>
@@ -102,6 +113,15 @@ function App() {
             element={
               <AccessGuard>
                 <StudentDashboard />
+              </AccessGuard>
+            }
+          />
+
+          <Route
+            path="/teacher-dashboard"
+            element={
+              <AccessGuard>
+                <TeacherDashboard />
               </AccessGuard>
             }
           />

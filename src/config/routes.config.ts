@@ -46,6 +46,14 @@ export const routeConfig: RouteConfigMap = {
       title: 'Complete Registration',
     },
   },
+  '/teacher-registration': {
+    requiredState: UserState.INCOMPLETE,
+    allowedRoles: ['teacher'],
+    fallbackRoute: '/teacher-dashboard',
+    metadata: {
+      title: 'Teacher Registration',
+    },
+  },
   '/volunteer-registration': {
     requiredState: UserState.INCOMPLETE,
     allowedRoles: ['volunteer'],
@@ -68,6 +76,14 @@ export const routeConfig: RouteConfigMap = {
     fallbackRoute: '/login',
     metadata: {
       title: 'Student Dashboard',
+    },
+  },
+  '/teacher-dashboard': {
+    requiredState: UserState.COMPLETE,
+    allowedRoles: ['teacher'],
+    fallbackRoute: '/login',
+    metadata: {
+      title: 'Teacher Dashboard',
     },
   },
   '/volunteer-dashboard': {
