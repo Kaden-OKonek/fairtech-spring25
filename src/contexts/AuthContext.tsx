@@ -12,9 +12,10 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   sendEmailVerification,
+  getAuth,
 } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { auth, db } from '../firebase';
+import { auth, db, functions } from '../firebase';
 import {
   AuthStatus,
   UserState,
@@ -22,6 +23,7 @@ import {
   UserProfile,
   AuthContextType,
 } from '../types/auth.types';
+import { httpsCallable } from 'firebase/functions';
 
 const initialAuthStatus: AuthStatus = {
   state: UserState.UNAUTHENTICATED,
@@ -31,6 +33,8 @@ const initialAuthStatus: AuthStatus = {
   user: null,
   metadata: {},
 };
+
+export const isSuperAdmin = (role: UserRole) => role === 'superAdmin';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -79,7 +83,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         error: 'Failed to fetch user status',
       }));
     }
-  }, []); // No dependencies needed as it doesn't use any external values
+  }, []);
 
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
@@ -204,6 +208,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const checkSuperAdmin = useCallback(async () => {
+    const auth = getAuth();
+    if (!auth.currentUser) return false;
+
+    try {
+      const checkSuperAdminFunc = httpsCallable(
+        functions,
+        'checkSuperAdminStatus'
+      );
+      const result = await checkSuperAdminFunc();
+      return (result.data as { isSuperAdmin: boolean }).isSuperAdmin;
+    } catch (error) {
+      console.error('Error checking super admin status:', error);
+      return false;
+    }
+  }, []);
+
   const value: AuthContextType = {
     authStatus,
     signIn,
@@ -211,6 +232,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     logOut,
     setUserRole,
     completeRegistration,
+    checkSuperAdmin,
     refreshStatus: () => updateAuthStatus(auth.currentUser),
   };
 

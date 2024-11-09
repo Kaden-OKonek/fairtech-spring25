@@ -17,6 +17,7 @@ import TeacherDashboard from './pages/TeacherDashboard';
 import VolunteerDashboard from './pages/VolunteerDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import LandingPage from './pages/LandingPage';
+import SuperAdminDashboard from './pages/SuperAdminDashboard';
 
 function App() {
   return (
@@ -140,6 +141,15 @@ function App() {
             element={
               <AccessGuard>
                 <AdminDashboard />
+              </AccessGuard>
+            }
+          />
+
+          <Route
+            path="/super-admin-dashboard"
+            element={
+              <AccessGuard>
+                <SuperAdminDashboard />
               </AccessGuard>
             }
           />
