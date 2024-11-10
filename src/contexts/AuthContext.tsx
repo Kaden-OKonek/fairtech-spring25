@@ -34,8 +34,6 @@ const initialAuthStatus: AuthStatus = {
   metadata: {},
 };
 
-export const isSuperAdmin = (role: UserRole) => role === 'superAdmin';
-
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -86,24 +84,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   useEffect(() => {
-    let unsubscribe: (() => void) | undefined;
-
-    try {
-      unsubscribe = onAuthStateChanged(auth, updateAuthStatus);
-    } catch (error) {
-      console.error('Error setting up auth listener:', error);
-      setAuthStatus((prev) => ({
-        ...prev,
-        isLoading: false,
-        error: 'Failed to initialize auth listener',
-      }));
-    }
-
-    return () => {
-      if (typeof unsubscribe === 'function') {
-        unsubscribe();
-      }
-    };
+    const unsubscribe = onAuthStateChanged(auth, updateAuthStatus);
+    return () => unsubscribe();
   }, [updateAuthStatus]);
 
   const signIn = async (email: string, password: string) => {
@@ -117,20 +99,50 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const signUp = async (email: string, password: string) => {
     try {
+      if (!email || !password) {
+        throw new Error('Email and password are required');
+      }
+
+      if (password.length < 6) {
+        throw new Error('Password should be at least 6 characters');
+      }
+
       const result = await createUserWithEmailAndPassword(
         auth,
         email,
         password
       );
+
+      // Send email verification
       await sendEmailVerification(result.user);
+
+      // Create initial user document
       await setDoc(doc(db, 'users', result.user.uid), {
         email: result.user.email,
         createdAt: new Date(),
         updatedAt: new Date(),
+        status: 'active',
       });
+
       await updateAuthStatus(result.user);
-    } catch (error) {
-      throw new Error('Registration failed');
+    } catch (error: any) {
+      console.error('Signup error:', error);
+
+      // Handle specific Firebase auth errors
+      if (error.code === 'auth/email-already-in-use') {
+        throw new Error('Email already in use');
+      } else if (error.code === 'auth/invalid-email') {
+        throw new Error('Invalid email address');
+      } else if (error.code === 'auth/operation-not-allowed') {
+        throw new Error(
+          'Email/password accounts are not enabled. Please contact support.'
+        );
+      } else if (error.code === 'auth/weak-password') {
+        throw new Error('Password is too weak');
+      }
+
+      // If it's not a known error, throw the original
+      throw error;
     }
   };
 
@@ -173,33 +185,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const userRef = doc(db, 'users', authStatus.user.uid);
       const now = new Date();
 
-      // Base registration data
+      // Create unified user document with role-specific data
       const registrationData = {
         ...userData,
         email: authStatus.user.email,
         registrationComplete: true,
         registrationCompletedAt: now,
         updatedAt: now,
-        createdAt: userData.createdAt || now,
+        status: 'active',
       };
 
-      // Update main user profile
+      // Update user document
       await setDoc(userRef, registrationData, { merge: true });
-
-      // Add to role-specific collection
-      if (userData.userType === 'student') {
-        const studentRef = doc(db, 'students', authStatus.user.uid);
-        await setDoc(studentRef, registrationData);
-      } else if (userData.userType === 'volunteer') {
-        const volunteerRef = doc(db, 'volunteers', authStatus.user.uid);
-        await setDoc(volunteerRef, registrationData);
-      } else if (userData.userType === 'judge') {
-        const judgeRef = doc(db, 'judges', authStatus.user.uid);
-        await setDoc(judgeRef, registrationData);
-      } else if (userData.userType === 'teacher') {
-        const teacherRef = doc(db, 'teachers', authStatus.user.uid);
-        await setDoc(teacherRef, registrationData);
-      }
 
       await updateAuthStatus(auth.currentUser);
     } catch (error) {

@@ -8,46 +8,71 @@ import {
   doc,
   Timestamp,
   getDocs,
+  QueryConstraint,
+  DocumentData,
 } from 'firebase/firestore';
+import { UserRole } from '../types/auth.types';
 
 export interface User {
   id: string;
   email: string;
   firstName?: string;
   lastName?: string;
-  userType: string;
+  userType: UserRole;
   status: 'active' | 'suspended' | 'inactive';
   registrationDate: Date;
   lastLogin?: Date;
+  school?: string;
+  grade?: number;
 }
+
+// Helper function to convert Firestore data to User type
+const convertToUser = (doc: DocumentData): User => {
+  const data = doc.data();
+  return {
+    id: doc.id,
+    email: data.email,
+    firstName: data.firstName,
+    lastName: data.lastName,
+    userType: data.userType,
+    status: data.status || 'inactive',
+    registrationDate: data.createdAt?.toDate() || new Date(),
+    lastLogin: data.lastLogin?.toDate(),
+    school: data.school,
+    grade: data.grade,
+  };
+};
 
 export const usersService = {
   subscribeToUsers(callback: (users: User[]) => void) {
     const usersRef = collection(db, 'users');
-
     return onSnapshot(usersRef, (snapshot) => {
-      const users = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-        registrationDate: doc.data().createdAt?.toDate() || new Date(),
-        lastLogin: doc.data().lastLogin?.toDate(),
-      })) as User[];
-
+      const users = snapshot.docs.map(convertToUser);
       callback(users);
     });
   },
 
-  async getUsersByRole(role: string): Promise<User[]> {
+  async getUsersByRole(role: UserRole): Promise<User[]> {
     const usersRef = collection(db, 'users');
     const q = query(usersRef, where('userType', '==', role));
     const snapshot = await getDocs(q);
 
-    return snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-      registrationDate: doc.data().createdAt?.toDate() || new Date(),
-      lastLogin: doc.data().lastLogin?.toDate(),
-    })) as User[];
+    return snapshot.docs.map(convertToUser);
+  },
+
+  async getUsersByRoleAndStatus(
+    role: UserRole,
+    status: 'active' | 'suspended' | 'inactive'
+  ): Promise<User[]> {
+    const usersRef = collection(db, 'users');
+    const constraints: QueryConstraint[] = [
+      where('userType', '==', role),
+      where('status', '==', status),
+    ];
+    const q = query(usersRef, ...constraints);
+    const snapshot = await getDocs(q);
+
+    return snapshot.docs.map(convertToUser);
   },
 
   async updateUserStatus(
@@ -61,30 +86,38 @@ export const usersService = {
     });
   },
 
+  async updateUserProfile(userId: string, updates: Partial<User>) {
+    const userRef = doc(db, 'users', userId);
+    const updateData = { ...updates };
+    delete updateData.id; // Remove id from updates
+
+    await updateDoc(userRef, {
+      ...updateData,
+      updatedAt: Timestamp.now(),
+    });
+  },
+
   async searchUsers(searchTerm: string): Promise<User[]> {
     const usersRef = collection(db, 'users');
     const snapshot = await getDocs(usersRef);
-
     const searchTermLower = searchTerm.toLowerCase();
 
-    return snapshot.docs
-      .map(
-        (doc) =>
-          ({
-            id: doc.id,
-            ...doc.data(),
-            registrationDate: doc.data().createdAt?.toDate() || new Date(),
-            lastLogin: doc.data().lastLogin?.toDate(),
-          }) as User
-      )
-      .filter((user) => {
-        // Safely handle potentially undefined values
-        const firstName = user.firstName?.toLowerCase() || '';
-        const lastName = user.lastName?.toLowerCase() || '';
-        const email = (user.email || '').toLowerCase();
+    const users = snapshot.docs.map(convertToUser);
 
-        const searchString = `${firstName} ${lastName} ${email}`;
-        return searchString.includes(searchTermLower);
-      });
+    return users.filter((user) => {
+      const firstName = user.firstName?.toLowerCase() || '';
+      const lastName = user.lastName?.toLowerCase() || '';
+      const email = user.email.toLowerCase();
+
+      return (
+        firstName.includes(searchTermLower) ||
+        lastName.includes(searchTermLower) ||
+        email.includes(searchTermLower)
+      );
+    });
+  },
+
+  async getActiveUsersByRole(role: UserRole): Promise<User[]> {
+    return this.getUsersByRoleAndStatus(role, 'active');
   },
 };

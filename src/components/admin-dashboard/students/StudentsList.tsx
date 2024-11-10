@@ -26,6 +26,8 @@ const StudentsList: React.FC<StudentsListProps> = ({ onViewStudent }) => {
   const [searchTerm, setSearchTerm] = useState('');
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [loading, setLoading] = useState(true);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const unsubscribe = studentsService.subscribeToStudents(
@@ -38,12 +40,35 @@ const StudentsList: React.FC<StudentsListProps> = ({ onViewStudent }) => {
     return () => unsubscribe();
   }, []);
 
-  const filteredStudents = students.filter(
-    (student) =>
-      student.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'active':
+        return 'success';
+      case 'suspended':
+        return 'error';
+      case 'inactive':
+        return 'warning';
+      default:
+        return 'default';
+    }
+  };
+
+  const filteredStudents = students.filter((student) => {
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      student.firstName.toLowerCase().includes(searchLower) ||
+      student.lastName.toLowerCase().includes(searchLower) ||
+      student.email.toLowerCase().includes(searchLower)
+    );
+  });
+
+  if (error) {
+    return (
+      <Box sx={{ p: 2 }}>
+        <Typography color="error">{error}</Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box>
@@ -105,7 +130,7 @@ const StudentsList: React.FC<StudentsListProps> = ({ onViewStudent }) => {
                 <TableCell align="center">
                   <Chip
                     label={student.status}
-                    color={student.status === 'active' ? 'success' : 'default'}
+                    color={getStatusColor(student.status)}
                     size="small"
                   />
                 </TableCell>

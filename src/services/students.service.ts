@@ -2,137 +2,89 @@ import { db } from '../firebase';
 import {
   collection,
   query,
-  getDocs,
   where,
   onSnapshot,
-  Timestamp,
+  getDocs,
+  QuerySnapshot,
+  DocumentData,
 } from 'firebase/firestore';
 import { Student } from '../types/student.types';
-import { FormSubmission, FormStatus } from '../types/forms.types';
+import { FormSubmission } from '../types/forms.types';
 
-// Type for the form statistics accumulator
-interface FormStats {
-  total: number;
-  pending: number;
-  approved: number;
-  rejected: number;
-  needs_revision: number;
-  [key: string]: number; // Index signature for dynamic access
-}
-
-const convertTimestampToDate = (timestamp: Timestamp | Date | undefined) => {
-  if (!timestamp) return new Date();
-  if (timestamp instanceof Date) return timestamp;
-  return timestamp.toDate();
+// Helper function to get form statistics
+const calculateFormStats = (forms: FormSubmission[]) => {
+  return forms.reduce(
+    (acc, form) => {
+      acc.total++;
+      switch (form.status) {
+        case 'pending':
+          acc.pending++;
+          break;
+        case 'approved':
+          acc.approved++;
+          break;
+        case 'rejected':
+          acc.rejected++;
+          break;
+        case 'needs_revision':
+          acc.needsRevision++;
+          break;
+      }
+      return acc;
+    },
+    {
+      total: 0,
+      pending: 0,
+      approved: 0,
+      rejected: 0,
+      needsRevision: 0,
+    }
+  );
 };
 
-// Helper function to safely get form status
-const getFormStatus = (status: any): FormStatus => {
-  const validStatuses: FormStatus[] = [
-    'pending',
-    'approved',
-    'rejected',
-    'needs_revision',
-  ];
-  return validStatuses.includes(status) ? status : 'pending';
+// Helper to convert Firestore data to Student type
+const convertToStudent = async (doc: DocumentData): Promise<Student> => {
+  const data = doc.data();
+
+  // Get forms for this student
+  const formsRef = collection(db, 'forms');
+  const formsQuery = query(formsRef, where('studentId', '==', doc.id));
+  const formsSnapshot = await getDocs(formsQuery);
+  const forms = formsSnapshot.docs.map((formDoc) => ({
+    ...formDoc.data(),
+    id: formDoc.id,
+    uploadDate: formDoc.data().uploadDate.toDate(),
+    lastUpdated: formDoc.data().lastUpdated.toDate(),
+  })) as FormSubmission[];
+
+  // Calculate form statistics
+  const formStats = calculateFormStats(forms);
+
+  return {
+    id: doc.id,
+    firstName: data.firstName || '',
+    lastName: data.lastName || '',
+    email: data.email || '',
+    school: data.school || '',
+    grade: data.grade || 0,
+    status: data.status || 'inactive',
+    registrationDate:
+      data.registrationCompletedAt?.toDate() ||
+      data.createdAt?.toDate() ||
+      new Date(),
+    formSubmissions: formStats,
+  };
 };
 
 export const studentsService = {
-  async getAllStudents(): Promise<Student[]> {
-    const studentsRef = collection(db, 'students');
-    const snapshot = await getDocs(studentsRef);
-
-    const students = await Promise.all(
-      snapshot.docs.map(async (doc) => {
-        const userData = doc.data();
-
-        // Get forms stats
-        const formsRef = collection(db, 'forms');
-        const formsQuery = query(formsRef, where('studentId', '==', doc.id));
-        const formsSnapshot = await getDocs(formsQuery);
-
-        const formStats = formsSnapshot.docs.reduce<FormStats>(
-          (acc, form) => {
-            const status = getFormStatus(form.data().status);
-            acc.total++;
-            acc[status]++;
-            return acc;
-          },
-          {
-            total: 0,
-            pending: 0,
-            approved: 0,
-            rejected: 0,
-            needs_revision: 0,
-          }
-        );
-
-        return {
-          id: doc.id,
-          firstName: userData.firstName || '',
-          lastName: userData.lastName || '',
-          email: userData.email || '',
-          school: userData.school || '',
-          grade: userData.grade || 0,
-          status: userData.status || 'active',
-          registrationDate: convertTimestampToDate(
-            userData.registrationCompletedAt || userData.createdAt
-          ),
-          formSubmissions: formStats,
-        } as unknown as Student;
-      })
-    );
-
-    return students;
-  },
-
   subscribeToStudents(callback: (students: Student[]) => void) {
-    const studentsRef = collection(db, 'users');
-    const q = query(studentsRef, where('userType', '==', 'student'));
+    const usersRef = collection(db, 'users');
+    const q = query(usersRef, where('userType', '==', 'student'));
 
-    return onSnapshot(q, async (snapshot) => {
-      const students = await Promise.all(
-        snapshot.docs.map(async (doc) => {
-          const userData = doc.data();
-
-          const formsRef = collection(db, 'forms');
-          const formsQuery = query(
-            formsRef,
-            where('studentId', '==', doc.id) // Filter forms by student ID
-          );
-          const formsSnapshot = await getDocs(formsQuery);
-
-          const formStats = formsSnapshot.docs.reduce<FormStats>(
-            (acc, form) => {
-              const status = getFormStatus(form.data().status);
-              acc.total++;
-              acc[status]++;
-              return acc;
-            },
-            {
-              total: 0,
-              pending: 0,
-              approved: 0,
-              rejected: 0,
-              needs_revision: 0,
-            }
-          );
-
-          return {
-            id: doc.id,
-            firstName: userData.firstName || '',
-            lastName: userData.lastName || '',
-            email: userData.email || '',
-            school: userData.school || '',
-            grade: userData.grade || 0,
-            status: userData.status || 'active',
-            registrationDate: convertTimestampToDate(
-              userData.registrationCompletedAt || userData.createdAt
-            ),
-            formSubmissions: formStats,
-          } as unknown as Student;
-        })
-      );
+    return onSnapshot(q, async (snapshot: QuerySnapshot<DocumentData>) => {
+      // Convert all documents to Students with form stats
+      const studentsPromises = snapshot.docs.map(convertToStudent);
+      const students = await Promise.all(studentsPromises);
 
       callback(students);
     });
@@ -143,14 +95,50 @@ export const studentsService = {
     const q = query(formsRef, where('studentId', '==', studentId));
     const snapshot = await getDocs(q);
 
-    return snapshot.docs.map((doc) => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        ...data,
-        uploadDate: convertTimestampToDate(data.uploadDate),
-        lastUpdated: convertTimestampToDate(data.lastUpdated),
-      } as FormSubmission;
-    });
+    return snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+      uploadDate: doc.data().uploadDate.toDate(),
+      lastUpdated: doc.data().lastUpdated.toDate(),
+    })) as FormSubmission[];
+  },
+
+  async getActiveStudents(): Promise<Student[]> {
+    const usersRef = collection(db, 'users');
+    const q = query(
+      usersRef,
+      where('userType', '==', 'student'),
+      where('status', '==', 'active')
+    );
+    const snapshot = await getDocs(q);
+
+    const studentsPromises = snapshot.docs.map(convertToStudent);
+    return Promise.all(studentsPromises);
+  },
+
+  async getStudentsBySchool(school: string): Promise<Student[]> {
+    const usersRef = collection(db, 'users');
+    const q = query(
+      usersRef,
+      where('userType', '==', 'student'),
+      where('school', '==', school)
+    );
+    const snapshot = await getDocs(q);
+
+    const studentsPromises = snapshot.docs.map(convertToStudent);
+    return Promise.all(studentsPromises);
+  },
+
+  async getStudentsByGrade(grade: number): Promise<Student[]> {
+    const usersRef = collection(db, 'users');
+    const q = query(
+      usersRef,
+      where('userType', '==', 'student'),
+      where('grade', '==', grade)
+    );
+    const snapshot = await getDocs(q);
+
+    const studentsPromises = snapshot.docs.map(convertToStudent);
+    return Promise.all(studentsPromises);
   },
 };
