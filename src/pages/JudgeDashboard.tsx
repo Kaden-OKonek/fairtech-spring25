@@ -1,27 +1,17 @@
 import React, { useState } from 'react';
-import { Box, Container, Button, Typography } from '@mui/material';
-import { useAuth } from '../contexts/AuthContext';
-import VolunteerSidebar, {
-  VolunteerContentType,
-} from '../components/volunteer-dashboard/Sidebar';
+import { Box, Container, Typography } from '@mui/material';
+import JudgeSidebar, {
+  JudgeContentType,
+} from '../components/judge-dashboard/Sidebar';
 
-const VolunteerDashboard: React.FC = () => {
+const JudgeDashboard: React.FC = () => {
   const [activeContent, setActiveContent] =
-    useState<VolunteerContentType>('tasks');
+    useState<JudgeContentType>('scoring');
   const [pendingTasksCount] = useState(0);
-  const { setUserRole } = useAuth();
-
-  const handleAdminPromotion = async () => {
-    try {
-      await setUserRole('admin');
-    } catch (error) {
-      console.error('Error promoting to admin:', error);
-    }
-  };
 
   const renderContent = () => {
     switch (activeContent) {
-      case 'tasks':
+      case 'scoring':
         return (
           <Box>
             <Box sx={{ mb: 4 }}>
@@ -31,10 +21,10 @@ const VolunteerDashboard: React.FC = () => {
                 color="primary"
                 fontWeight="bold"
               >
-                Volunteer Tasks
+                Project Scoring
               </Typography>
               <Typography variant="body1" color="text.secondary">
-                Manage and track your volunteer activities
+                Score and review projects
               </Typography>
             </Box>
             <Box
@@ -45,18 +35,7 @@ const VolunteerDashboard: React.FC = () => {
                 p: 3,
               }}
             >
-              <p>Task content will go here</p>
-              <Button
-                variant="outlined"
-                sx={{
-                  borderColor: 'primary.main',
-                  color: 'primary.main',
-                  mt: 2,
-                }}
-                onClick={handleAdminPromotion}
-              >
-                Request Admin Access (test feature)
-              </Button>
+              <p>Projects list and information will go here.</p>
             </Box>
           </Box>
         );
@@ -70,10 +49,10 @@ const VolunteerDashboard: React.FC = () => {
                 color="primary"
                 fontWeight="bold"
               >
-                Volunteer Profile
+                Judge Profile
               </Typography>
               <Typography variant="body1" color="text.secondary">
-                Manage your volunteer information and preferences
+                Manage your judge information and preferences
               </Typography>
             </Box>
             <Box
@@ -129,7 +108,7 @@ const VolunteerDashboard: React.FC = () => {
         backgroundColor: 'background.default',
       }}
     >
-      <VolunteerSidebar
+      <JudgeSidebar
         activeContent={activeContent}
         onContentChange={setActiveContent}
         pendingTasksCount={pendingTasksCount}
@@ -152,4 +131,4 @@ const VolunteerDashboard: React.FC = () => {
   );
 };
 
-export default VolunteerDashboard;
+export default JudgeDashboard;

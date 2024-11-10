@@ -30,6 +30,14 @@ export const routeConfig: RouteConfigMap = {
       title: 'Select User Type',
     },
   },
+  '/judge-registration': {
+    requiredState: UserState.INCOMPLETE,
+    allowedRoles: ['judge'],
+    fallbackRoute: '/judge-dashboard',
+    metadata: {
+      title: 'Judge Registration',
+    },
+  },
   '/student-registration': {
     requiredState: UserState.INCOMPLETE,
     allowedRoles: ['student'],
@@ -44,6 +52,14 @@ export const routeConfig: RouteConfigMap = {
     fallbackRoute: '/volunteer-dashboard',
     metadata: {
       title: 'Volunteer Registration',
+    },
+  },
+  '/judge-dashboard': {
+    requiredState: UserState.COMPLETE,
+    allowedRoles: ['judge'],
+    fallbackRoute: '/login',
+    metadata: {
+      title: 'Judge Dashboard',
     },
   },
   '/student-dashboard': {

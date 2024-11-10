@@ -28,6 +28,10 @@ const UserStatusCheck: React.FC = () => {
             if (!userData.firstname) {
               navigate('/volunteer-dashboard');
             }
+          } else if (userData.userType === 'judge') {
+            if (!userData.firstname) {
+              navigate('/judge-dashboard');
+            }
           }
         } else {
           navigate('/user-type-selection');

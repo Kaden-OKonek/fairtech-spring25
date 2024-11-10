@@ -189,6 +189,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       } else if (userData.userType === 'volunteer') {
         const volunteerRef = doc(db, 'volunteers', authStatus.user.uid);
         await setDoc(volunteerRef, registrationData);
+      } else if (userData.userType === 'judge') {
+        const judgeRef = doc(db, 'judges', authStatus.user.uid);
+        await setDoc(judgeRef, registrationData);
       }
 
       await updateAuthStatus(auth.currentUser);

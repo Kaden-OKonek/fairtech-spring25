@@ -10,26 +10,26 @@ import {
   useTheme,
   Divider,
 } from '@mui/material';
-import { ClipboardList, Users, Settings } from 'lucide-react';
+import { ClipboardCheck, UserCircle, Settings } from 'lucide-react';
 import LogoutButton from '../LogoutButton';
 import { useAuth } from '../../contexts/AuthContext';
 
-export type AdminContentType = 'forms' | 'students' | 'settings';
+export type VolunteerContentType = 'tasks' | 'profile' | 'settings';
 
 interface SidebarProps {
-  activeContent: AdminContentType;
-  onContentChange: (content: AdminContentType) => void;
-  pendingFormsCount: number;
+  activeContent: VolunteerContentType;
+  onContentChange: (content: VolunteerContentType) => void;
+  pendingTasksCount: number;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
   activeContent,
   onContentChange,
-  pendingFormsCount,
+  pendingTasksCount,
 }) => {
   const theme = useTheme();
   const { authStatus } = useAuth();
-  const userName = authStatus.metadata?.firstName || 'Admin';
+  const userName = authStatus.metadata?.firstName || 'Volunteer';
 
   return (
     <Box
@@ -51,7 +51,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         }}
       >
         <Typography variant="h5" color="primary" fontWeight="bold">
-          Admin Portal
+          Volunteer Portal
         </Typography>
       </Box>
 
@@ -69,8 +69,8 @@ const Sidebar: React.FC<SidebarProps> = ({
       <List sx={{ px: 2, flexGrow: 1 }}>
         <ListItem disablePadding sx={{ mb: 1 }}>
           <ListItemButton
-            onClick={() => onContentChange('forms')}
-            selected={activeContent === 'forms'}
+            onClick={() => onContentChange('tasks')}
+            selected={activeContent === 'tasks'}
             sx={{
               borderRadius: '12px',
               '&.Mui-selected': {
@@ -81,11 +81,11 @@ const Sidebar: React.FC<SidebarProps> = ({
               },
             }}
           >
-            <ClipboardList size={20} />
-            <ListItemText primary="Form Reviews" sx={{ ml: 2 }} />
-            {pendingFormsCount > 0 && (
+            <ClipboardCheck size={20} />
+            <ListItemText primary="Tasks" sx={{ ml: 2 }} />
+            {pendingTasksCount > 0 && (
               <Badge
-                badgeContent={pendingFormsCount}
+                badgeContent={pendingTasksCount}
                 color="error"
                 sx={{
                   '& .MuiBadge-badge': {
@@ -99,8 +99,8 @@ const Sidebar: React.FC<SidebarProps> = ({
 
         <ListItem disablePadding sx={{ mb: 1 }}>
           <ListItemButton
-            onClick={() => onContentChange('students')}
-            selected={activeContent === 'students'}
+            onClick={() => onContentChange('profile')}
+            selected={activeContent === 'profile'}
             sx={{
               borderRadius: '12px',
               '&.Mui-selected': {
@@ -111,8 +111,8 @@ const Sidebar: React.FC<SidebarProps> = ({
               },
             }}
           >
-            <Users size={20} />
-            <ListItemText primary="Students" sx={{ ml: 2 }} />
+            <UserCircle size={20} />
+            <ListItemText primary="Profile" sx={{ ml: 2 }} />
           </ListItemButton>
         </ListItem>
 

@@ -50,6 +50,7 @@ const StudentDashboard: React.FC = () => {
       <Sidebar
         activeContent={activeContent}
         onContentChange={setActiveContent}
+        reviewedFormsCount={reviewedFormsCount}
       />
       <Box sx={{ flexGrow: 1, padding: 4 }}>{renderContent()}</Box>
     </Box>
