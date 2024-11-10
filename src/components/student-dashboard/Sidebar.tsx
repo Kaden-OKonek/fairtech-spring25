@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Typography,
@@ -12,12 +12,12 @@ import {
 } from '@mui/material';
 import { ClipboardList, Microscope, Settings } from 'lucide-react';
 import LogoutButton from '../LogoutButton';
-import { StudentContentType } from '../../types/studentDashboard';
+import { ContentType } from '../../types/studentDashboard';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface SidebarProps {
-  activeContent: StudentContentType;
-  onContentChange: (content: StudentContentType) => void;
+  activeContent: ContentType;
+  onContentChange: (content: ContentType) => void;
   reviewedFormsCount: number;
 }
 
@@ -29,6 +29,12 @@ const Sidebar: React.FC<SidebarProps> = ({
   const theme = useTheme();
   const { authStatus } = useAuth();
   const userName = authStatus.metadata?.firstName || 'Student';
+  const [isPaperworkExpanded, setIsPaperworkExpanded] = useState(false);
+
+  const handlePaperworkClick = () => {
+    setIsPaperworkExpanded((prev) => !prev);
+    onContentChange('paperwork'); // Set the main content to Paperwork on click
+  };
 
   return (
     <Box
@@ -66,9 +72,10 @@ const Sidebar: React.FC<SidebarProps> = ({
       </Box>
 
       <List sx={{ px: 2, flexGrow: 1 }}>
+        {/* Paperwork Section with Dropdown */}
         <ListItem disablePadding sx={{ mb: 1 }}>
           <ListItemButton
-            onClick={() => onContentChange('paperwork')}
+            onClick={handlePaperworkClick}
             selected={activeContent === 'paperwork'}
             sx={{
               borderRadius: '12px',
@@ -96,6 +103,49 @@ const Sidebar: React.FC<SidebarProps> = ({
           </ListItemButton>
         </ListItem>
 
+        {/* Paperwork Dropdown Items */}
+        {isPaperworkExpanded && (
+          <>
+            <ListItem disablePadding sx={{ mb: 1 }}>
+              <ListItemButton
+                onClick={() => onContentChange('form-questionnaire')}
+                selected={activeContent === 'form-questionnaire'}
+                sx={{
+                  pl: 6,
+                  borderRadius: '12px',
+                  '&.Mui-selected': {
+                    backgroundColor: 'primary.lighter',
+                    '&:hover': {
+                      backgroundColor: 'primary.light',
+                    },
+                  },
+                }}
+              >
+                <ListItemText primary="Form Questionnaire" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding sx={{ mb: 1 }}>
+              <ListItemButton
+                onClick={() => onContentChange('my-documents')}
+                selected={activeContent === 'my-documents'}
+                sx={{
+                  pl: 6,
+                  borderRadius: '12px',
+                  '&.Mui-selected': {
+                    backgroundColor: 'primary.lighter',
+                    '&:hover': {
+                      backgroundColor: 'primary.light',
+                    },
+                  },
+                }}
+              >
+                <ListItemText primary="My Documents" />
+              </ListItemButton>
+            </ListItem>
+          </>
+        )}
+
+        {/* Projects Button */}
         <ListItem disablePadding sx={{ mb: 1 }}>
           <ListItemButton
             onClick={() => onContentChange('projects')}
@@ -115,6 +165,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           </ListItemButton>
         </ListItem>
 
+        {/* Settings Button */}
         <ListItem disablePadding sx={{ mb: 1 }}>
           <ListItemButton
             onClick={() => onContentChange('settings')}

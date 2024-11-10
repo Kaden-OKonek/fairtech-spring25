@@ -4,12 +4,13 @@ import Sidebar from '../components/student-dashboard/Sidebar';
 import ProjectsContent from '../components/student-dashboard/content/ProjectsContent';
 import PaperworkContent from '../components/student-dashboard/content/PaperworkContent';
 import AccountSettingsContent from '../components/student-dashboard/content/AccountSettingsContent';
-import { StudentContentType } from '../types/studentDashboard';
+import { ContentType } from '../types/studentDashboard';
+import FormQuestions from '../components/student-dashboard/content/FormQuestions';
+import DocumentsPage from '../components/student-dashboard/content/MyDocuments';
 import { useAuth } from '../contexts/AuthContext';
 
 const StudentDashboard: React.FC = () => {
-  const [activeContent, setActiveContent] =
-    useState<StudentContentType>('projects');
+  const [activeContent, setActiveContent] = useState<ContentType>('projects');
   const [reviewedFormsCount] = useState(0);
   const { authStatus } = useAuth();
 
@@ -17,6 +18,10 @@ const StudentDashboard: React.FC = () => {
     switch (activeContent) {
       case 'paperwork':
         return <PaperworkContent />;
+      case 'form-questionnaire':
+        return <FormQuestions />;
+      case 'my-documents':
+        return <DocumentsPage />;
       case 'projects':
         return <ProjectsContent />;
       case 'settings':
