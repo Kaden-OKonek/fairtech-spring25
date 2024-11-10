@@ -12,12 +12,12 @@ import {
 } from '@mui/material';
 import { ClipboardList, Microscope, Settings } from 'lucide-react';
 import LogoutButton from '../LogoutButton';
-import { StudentContentType } from '../../types/studentDashboard';
+import { ContentType } from '../../types/studentDashboard';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface SidebarProps {
-  activeContent: StudentContentType;
-  onContentChange: (content: StudentContentType) => void;
+  activeContent: ContentType;
+  onContentChange: (content: ContentType) => void;
   reviewedFormsCount: number;
 }
 
@@ -72,9 +72,10 @@ const Sidebar: React.FC<SidebarProps> = ({
       </Box>
 
       <List sx={{ px: 2, flexGrow: 1 }}>
+        {/* Paperwork Section with Dropdown */}
         <ListItem disablePadding sx={{ mb: 1 }}>
           <ListItemButton
-            onClick={() => onContentChange('paperwork')}
+            onClick={handlePaperworkClick}
             selected={activeContent === 'paperwork'}
             sx={{
               borderRadius: '12px',
@@ -89,14 +90,6 @@ const Sidebar: React.FC<SidebarProps> = ({
             <ClipboardList size={20} />
             <ListItemText primary="My Paperwork" sx={{ ml: 2 }} />
             {reviewedFormsCount > 0 && (
-        <List>
-          {/* Paperwork Section */}
-          <ListItem disablePadding>
-            <ListItemButton
-              onClick={handlePaperworkClick}
-              selected={activeContent === 'paperwork'}
-            >
-              <ListItemText primary="Paperwork" />
               <Badge
                 badgeContent={reviewedFormsCount}
                 color="error"
@@ -110,6 +103,49 @@ const Sidebar: React.FC<SidebarProps> = ({
           </ListItemButton>
         </ListItem>
 
+        {/* Paperwork Dropdown Items */}
+        {isPaperworkExpanded && (
+          <>
+            <ListItem disablePadding sx={{ mb: 1 }}>
+              <ListItemButton
+                onClick={() => onContentChange('form-questionnaire')}
+                selected={activeContent === 'form-questionnaire'}
+                sx={{
+                  pl: 6,
+                  borderRadius: '12px',
+                  '&.Mui-selected': {
+                    backgroundColor: 'primary.lighter',
+                    '&:hover': {
+                      backgroundColor: 'primary.light',
+                    },
+                  },
+                }}
+              >
+                <ListItemText primary="Form Questionnaire" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding sx={{ mb: 1 }}>
+              <ListItemButton
+                onClick={() => onContentChange('my-documents')}
+                selected={activeContent === 'my-documents'}
+                sx={{
+                  pl: 6,
+                  borderRadius: '12px',
+                  '&.Mui-selected': {
+                    backgroundColor: 'primary.lighter',
+                    '&:hover': {
+                      backgroundColor: 'primary.light',
+                    },
+                  },
+                }}
+              >
+                <ListItemText primary="My Documents" />
+              </ListItemButton>
+            </ListItem>
+          </>
+        )}
+
+        {/* Projects Button */}
         <ListItem disablePadding sx={{ mb: 1 }}>
           <ListItemButton
             onClick={() => onContentChange('projects')}
@@ -129,6 +165,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           </ListItemButton>
         </ListItem>
 
+        {/* Settings Button */}
         <ListItem disablePadding sx={{ mb: 1 }}>
           <ListItemButton
             onClick={() => onContentChange('settings')}
@@ -151,53 +188,6 @@ const Sidebar: React.FC<SidebarProps> = ({
 
       <Box sx={{ p: 2 }}>
         <LogoutButton variant="outlined" color="primary" />
-            </ListItemButton>
-          </ListItem>
-
-          {/* Conditionally render sub-buttons if expanded */}
-          {isPaperworkExpanded && (
-            <>
-              <ListItem disablePadding>
-                <ListItemButton
-                  onClick={() => onContentChange('form-questionnaire')}
-                  selected={activeContent === 'form-questionnaire'}
-                  sx={{ pl: 4 }}
-                >
-                  <ListItemText primary="Form Questionnaire" />
-                </ListItemButton>
-              </ListItem>
-              <ListItem disablePadding>
-                <ListItemButton
-                  onClick={() => onContentChange('my-documents')}
-                  selected={activeContent === 'my-documents'}
-                  sx={{ pl: 4 }}
-                >
-                  <ListItemText primary="My Documents" />
-                </ListItemButton>
-              </ListItem>
-            </>
-          )}
-
-          {/* Projects Button */}
-          <ListItem disablePadding>
-            <ListItemButton
-              onClick={() => onContentChange('projects')}
-              selected={activeContent === 'projects'}
-            >
-              <ListItemText primary="My Projects" />
-            </ListItemButton>
-          </ListItem>
-
-          {/* Settings Button */}
-          <ListItem disablePadding>
-            <ListItemButton
-              onClick={() => onContentChange('settings')}
-              selected={activeContent === 'settings'}
-            >
-              <ListItemText primary="Account Settings" />
-            </ListItemButton>
-          </ListItem>
-        </List>
       </Box>
     </Box>
   );

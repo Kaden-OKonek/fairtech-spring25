@@ -27,303 +27,154 @@ const PaperworkContent: React.FC = () => {
 
   const handleGoToQuestionnaire = () => {
     navigate('/form-questionnaire');
-  const handleGoToQuestionnaire = () => {
-    // Implement navigation logic to go to the questionnaire page
-    console.log('Navigating to Form Questionnaire');
   };
 
   return (
-    <Box
-      sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
-    >
     <Box
       sx={{
         display: 'flex',
         flexDirection: 'column',
         gap: 4,
         alignItems: 'center',
+        padding: 4,
       }}
     >
       <Typography variant="h4" gutterBottom>
-        PaperWork
-      </Typography>
-
-      <Typography
-        variant="h5"
-        align="justify"
-        sx={{ marginTop: 1, width: '80%', maxWidth: '500px' }}
-      >
-        Not sure what documents you need? Complete the{' '}
-        <strong>Form Questionnaire</strong> to get a customized list.
-        <br />
-      </Typography>
-      <Typography
-        variant="h5"
-        align="center"
-        sx={{ marginTop: 1, width: '80%', maxWidth: '500px' }}
-      >
-        Click here to get the Form Questionnaire.
-        <br />
-        <br />
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleGoToQuestionnaire}
-          sx={{
-            backgroundColor: '#512da8',
-            marginRight: 2,
-            fontSize: '1.5rem',
-            padding: '12px 24px',
-            width: '50%',
-            height: '80px',
-            '&:hover': { backgroundColor: '#4527a0' },
-          }}
-        >
-          Form Questionnaire
-        </Button>
-      </Typography>
-      <br />
-      <Typography
-        variant="h5"
-        align="center"
-        sx={{ marginTop: 1, width: '80%', maxWidth: '500px' }}
-      >
-        If your project conditions have changed, you can retake the
-        questionnaire anytime by going to the Form Questionnaire under
-        paperwork.
-      </Typography>
-      <br />
-      <br />
-      <Typography
-        variant="h5"
-        align="center"
-        sx={{ marginTop: 1, width: '80%', maxWidth: '500px' }}
-      >
-        To track the review status of your uploaded files, visit{' '}
-        <strong>My Documents</strong> under Paperwork.
         Paperwork
       </Typography>
 
       {/* Custom Information Section */}
       <Box
-        className="w-full max-w-xl p-6"
         sx={{
           backgroundColor: '#f9f9f9',
           borderRadius: 2,
           boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-          textAlign: 'center',
           padding: 4,
-          marginBottom: 4,
+          width: '100%',
+          maxWidth: '800px',
+          textAlign: 'center',
         }}
       >
         {/* Questionnaire Section */}
-        <Box className="flex flex-col items-center mb-12">
-          <Box
-            className="text-center w-4/5 max-w-[400px] mb-6"
-            sx={{ marginBottom: 3 }}
-          >
-            <Typography
-              variant="h4"
-              className="text-xl mb-4"
-              sx={{ marginBottom: 2, color: '#555' }}
-            >
-              Not sure what documents you need? Complete the{' '}
-              <strong>Form Questionnaire</strong> to get a customized list.
-            </Typography>
-            <Button
-              onClick={handleGoToQuestionnaire}
-              className="w-1/2 h-20 text-xl bg-purple-700 hover:bg-purple-800"
-              variant="contained"
-              color="primary"
-              sx={{
-                fontSize: '1rem',
-                padding: '12px 24px',
-                backgroundColor: '#6a1b9a',
-                '&:hover': {
-                  backgroundColor: '#4a148c',
-                },
-              }}
-            >
-              Form Questionnaire
-            </Button>
-          </Box>
+        <Box sx={{ marginBottom: 6 }}>
+          <Typography variant="h5" sx={{ marginBottom: 3, color: '#555' }}>
+            Not sure what documents you need? Complete the{' '}
+            <strong>Form Questionnaire</strong> to get a customized list.
+          </Typography>
 
-          <Typography
-            variant="h5"
-            className="text-xl text-center w-4/5 max-w-[400px] mb-6"
-            sx={{ marginBottom: 2, color: '#666' }}
+          <Button
+            onClick={handleGoToQuestionnaire}
+            variant="contained"
+            color="primary"
+            sx={{
+              backgroundColor: '#512da8',
+              fontSize: '1.2rem',
+              padding: '12px 24px',
+              height: '60px',
+              marginBottom: 3,
+              '&:hover': { backgroundColor: '#4527a0' },
+            }}
           >
+            Form Questionnaire
+          </Button>
+
+          <Typography variant="body1" sx={{ marginBottom: 2, color: '#666' }}>
             If your project conditions have changed, you can retake the
             questionnaire anytime by going to the Form Questionnaire under
             paperwork.
-            <br />
           </Typography>
 
-          <Typography
-            variant="h5"
-            className="text-xl text-center w-4/5 max-w-[400px] mb-12"
-            sx={{ color: '#666' }}
-          >
+          <Typography variant="body1" sx={{ color: '#666' }}>
             To track the review status of your uploaded files, visit{' '}
             <strong>My Documents</strong> under Paperwork.
           </Typography>
         </Box>
-      </Box>
 
-      {!auth.currentUser && (
-        <Alert
-          severity="warning"
-          sx={{ marginTop: 4, width: '80%', maxWidth: '500px' }}
-        >
-          Please login to upload files.
-        </Alert>
-      )}
+        {/* Upload Section */}
+        <Box sx={{ marginTop: 4 }}>
+          <Typography variant="h6" sx={{ marginBottom: 2, color: '#333' }}>
+            Upload New Form
+          </Typography>
 
-      {auth.currentUser && !auth.currentUser.emailVerified && (
-        <Alert
-          severity="warning"
-          sx={{ marginTop: 4, width: '80%', maxWidth: '500px' }}
-        >
-          Please verify your email before uploading files.
-        </Alert>
-      )}
+          {!auth.currentUser && (
+            <Alert severity="warning" sx={{ marginBottom: 2 }}>
+              Please login to upload files.
+            </Alert>
+          )}
 
-      <Box
-        sx={{
-          marginTop: 4,
-          textAlign: 'center',
-          width: '80%',
-          maxWidth: '500px',
-        }}
-      >
-        <Input
-          type="file"
-          onChange={handleFileChange}
-          sx={{ display: 'none' }}
-          id="pdf-upload-input"
-          inputProps={{ accept: '.pdf' }}
-        />
-        <label htmlFor="pdf-upload-input">
-          <Button
-            variant="contained"
-            component="span"
-            startIcon={<CloudUploadIcon />}
+          {auth.currentUser && !auth.currentUser.emailVerified && (
+            <Alert severity="warning" sx={{ marginBottom: 2 }}>
+              Please verify your email before uploading files.
+            </Alert>
+          )}
+
+          <Box
             sx={{
-              backgroundColor: '#512da8',
-              marginRight: 2,
-              fontSize: '1.5rem',
-              padding: '12px 24px',
-              width: '50%',
-              height: '70px',
-              '&:hover': { backgroundColor: '#4527a0' },
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 2,
+              alignItems: 'center',
             }}
           >
-            Select PDF
-          </Button>
-        </label>
-        {selectedFile && (
-          <Typography variant="body1" sx={{ marginTop: 2 }}>
-            Selected file: {selectedFile.name}
-          </Typography>
-        )}
-        {errorMessage && (
-          <Alert severity="error" sx={{ marginTop: 2 }}>
-            {errorMessage}
-          </Alert>
-        )}
-      </Box>
-      {/* Upload Section */}
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 2,
-          alignItems: 'center',
-        }}
-      >
-        <Typography variant="h6" sx={{ color: '#333' }}>
-          Upload New Form
-        </Typography>
-        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-          <Input
-            type="file"
-            onChange={handleFileChange}
-            sx={{ display: 'none' }}
-            id="pdf-upload-input"
-            inputProps={{ accept: '.pdf' }}
-          />
-          <label htmlFor="pdf-upload-input">
+            <Input
+              type="file"
+              onChange={handleFileChange}
+              sx={{ display: 'none' }}
+              id="pdf-upload-input"
+              inputProps={{ accept: '.pdf' }}
+            />
+            <label htmlFor="pdf-upload-input">
+              <Button
+                variant="contained"
+                component="span"
+                startIcon={<CloudUploadIcon />}
+                sx={{
+                  backgroundColor: '#512da8',
+                  padding: '8px 24px',
+                  '&:hover': { backgroundColor: '#4527a0' },
+                }}
+              >
+                Select PDF
+              </Button>
+            </label>
+
+            {selectedFile && (
+              <Typography variant="body2" sx={{ color: '#333' }}>
+                Selected: {selectedFile.name}
+              </Typography>
+            )}
+
             <Button
               variant="contained"
-              component="span"
-              startIcon={<CloudUploadIcon />}
+              onClick={handleUpload}
+              disabled={
+                !selectedFile ||
+                isUploading ||
+                !auth.currentUser ||
+                !auth.currentUser.emailVerified
+              }
               sx={{
-                minWidth: '150px',
-                backgroundColor: '#0288d1',
-                color: '#fff',
-                '&:hover': { backgroundColor: '#0277bd' },
+                backgroundColor: '#512da8',
+                width: '200px',
+                '&:hover': { backgroundColor: '#4527a0' },
               }}
             >
-              Select PDF
+              {isUploading ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : (
+                'Upload PDF'
+              )}
             </Button>
-          </label>
-          {selectedFile && (
-            <Typography variant="body2" sx={{ color: '#333' }}>
-              Selected: {selectedFile.name}
-            </Typography>
-          )}
+
+            {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
+
+            {uploadStatus === 'success' && (
+              <Alert severity="success">
+                File uploaded successfully! It will be reviewed shortly.
+              </Alert>
+            )}
+          </Box>
         </Box>
-
-      <Box sx={{ marginTop: 2, width: '80%', maxWidth: '500px' }}>
-        <Button
-          variant="contained"
-          onClick={handleUpload}
-          disabled={
-            !selectedFile ||
-            isUploading ||
-            !auth.currentUser ||
-            !auth.currentUser.emailVerified
-          }
-          sx={{
-            backgroundColor: '#512da8',
-            width: '100%',
-            height: '60px',
-            alignItems: 'center',
-          }}
-          disabled={!selectedFile || isUploading}
-          sx={{
-            maxWidth: '200px',
-            backgroundColor: '#0288d1',
-            color: '#fff',
-            '&:hover': { backgroundColor: '#0277bd' },
-          }}
-        >
-          {isUploading ? (
-            <CircularProgress size={24} color="inherit" />
-          ) : (
-            'Upload PDF'
-          )}
-        </Button>
-      </Box>
-
-      {uploadStatus === 'success' && (
-        <Alert
-          severity="success"
-          sx={{ marginTop: 2, width: '80%', maxWidth: '500px' }}
-        >
-          File uploaded successfully! It will be reviewed shortly.
-        </Alert>
-      )}
-        {errorMessage && (
-          <Alert severity="error" sx={{ maxWidth: '500px', marginTop: 2 }}>
-            {errorMessage}
-          </Alert>
-        )}
-        {uploadStatus === 'success' && (
-          <Alert severity="success" sx={{ maxWidth: '500px', marginTop: 2 }}>
-            Form uploaded successfully! It will be reviewed shortly.
-          </Alert>
-        )}
       </Box>
     </Box>
   );

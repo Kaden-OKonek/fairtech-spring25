@@ -11,6 +11,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 const StudentDashboard: React.FC = () => {
   const [activeContent, setActiveContent] = useState<ContentType>('projects');
+  const [reviewedFormsCount] = useState(0);
   const { authStatus } = useAuth();
 
   const renderContent = () => {
