@@ -1,131 +1,239 @@
 import React from 'react';
-import { Box, Button, Typography } from '@mui/material';
-import logo from '../assets/images/Southern_MN_Science_Fair_Logo.png';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom';
+import { Button } from '../components/ui/button';
+import { Card, CardContent } from '../components/ui/card';
+import { Calendar, Users, Award, ArrowRight, Mail, LogIn } from 'lucide-react';
 
-const LandingPage: React.FC = () => {
-  const navigate = useNavigate(); // Initialize navigate function
+const LandingPage = () => {
+  const navigate = useNavigate();
+
+  const handleLogin = () => {
+    navigate('/login');
+  };
+
+  const handleContact = () => {
+    // Implement contact functionality
+    console.log('Contact clicked');
+  };
 
   return (
-    <Box
-      sx={{
-        textAlign: 'center',
-        padding: '40px',
-        backgroundColor: '#ffffff', //Background is white
-        color: 'white',
-        minHeight: '80vh', //Total height of the page
-      }}
-    >
-      {/* Header Section */}
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          marginBottom: '20px',
-        }}
-      >
-        <Button //Button to navigate to the "Contact Us" Page
-          variant="contained"
-          sx={{ backgroundColor: '#ffffff', color: '#5a2b8c' }}
-        >
-          Contact Us
-        </Button>
-        <Button //Button to navigate to the "Login" Page
-          onClick={() => navigate('/login')}
-          variant="contained"
-          sx={{ backgroundColor: '#ffffff', color: '#5a2b8c' }}
-        >
-          Login
-        </Button>
-      </Box>
+    <div className="min-h-screen bg-white">
+      {/* Navigation Bar */}
+      <nav className="bg-white border-b">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex justify-end gap-4">
+            <Button
+              variant="ghost"
+              className="flex items-center gap-2"
+              onClick={handleContact}
+            >
+              <Mail className="h-4 w-4" />
+              Contact
+            </Button>
+            <Button
+              variant="default"
+              className="flex items-center gap-2"
+              onClick={handleLogin}
+            >
+              <LogIn className="h-4 w-4" />
+              Login
+            </Button>
+          </div>
+        </div>
+      </nav>
 
-      {/* Main Section */}
-      <Box
-        sx={{
-          backgroundColor: '#ffffff',
-          color: '#5a2b8c',
-          padding: '30px',
-          marginBottom: '60px',
-          borderRadius: '8px',
-        }}
-      >
-        <img //This Imagine is the Southern MN Science Fair Logo displayed at the top of the page
-          src={logo}
-          alt="Southern MN Science Fair Logo"
-          style={{ width: '650px', height: 'auto' }}
-        />
-        <Typography variant="h4" gutterBottom>
-          <br />
-          Welcome to Southern Minnesota Science Fair!
-        </Typography>
+      {/* Hero Section */}
+      <section className="bg-gradient-to-br from-blue-600 to-indigo-700">
+        <div className="container mx-auto px-6 py-24">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div className="space-y-8">
+              <h1 className="text-4xl md:text-5xl font-bold text-white">
+                Southern Minnesota Science Fair
+              </h1>
+              <p className="text-xl text-blue-100">
+                Empowering young minds to explore, discover, and innovate
+                through science.
+              </p>
+              <div className="flex flex-wrap gap-4">
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  className="flex items-center gap-2"
+                  onClick={handleLogin}
+                >
+                  <LogIn className="h-5 w-5" />
+                  Login
+                </Button>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="flex items-center gap-2 border-white text-white hover:text-white"
+                  onClick={handleContact}
+                >
+                  <Mail className="h-5 w-5" />
+                  Contact Us
+                </Button>
+              </div>
+            </div>
 
-        <Box //These next two boxes are side by side by design
-          display="flex"
-          alignItems="center" // Vertically centers items
-          justifyContent="center" // Horizontally centers both text and button
-          gap="30px" // Space between text and button
-        >
-          <Typography variant="body1" gutterBottom>
-            Let us take care of online registration for your fair! <br />
-            Simplify your planning and make your event a success!
-          </Typography>
+            <Card className="bg-white/10 backdrop-blur-sm border-0">
+              <CardContent className="p-8">
+                <h3 className="text-2xl font-semibold mb-6 text-white">
+                  Upcoming Fair
+                </h3>
+                <div className="space-y-4 text-white">
+                  <div className="flex items-center gap-3">
+                    <Calendar className="h-5 w-5" />
+                    <span>March 15-17, 2025</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Users className="h-5 w-5" />
+                    <span>200+ Projects Expected</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Award className="h-5 w-5" />
+                    <span>$10,000 in Prizes</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
 
-          <Button //Another button that navigates to the login page
-            onClick={() => navigate('/login')}
-            variant="contained"
-            sx={{
-              backgroundColor: '#5a2b8c',
-              color: '#ffffff',
-            }}
+      {/* Features Section */}
+      <section className="py-24 bg-gray-50">
+        <div className="container mx-auto px-6">
+          <h2 className="text-3xl font-bold text-center mb-16">
+            Why Use Our Platform?
+          </h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            {features.map((feature, index) => (
+              <Card key={index} className="border-0 shadow-lg">
+                <CardContent className="p-8">
+                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-6">
+                    {feature.icon}
+                  </div>
+                  <h3 className="text-xl font-semibold mb-4">
+                    {feature.title}
+                  </h3>
+                  <p className="text-gray-600">{feature.description}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className="py-24">
+        <div className="container mx-auto px-6">
+          <div className="grid md:grid-cols-4 gap-8 text-center">
+            {stats.map((stat, index) => (
+              <div key={index}>
+                <div className="text-4xl font-bold text-blue-600 mb-2">
+                  {stat.value}
+                </div>
+                <div className="text-gray-600">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="bg-blue-600 text-white py-16">
+        <div className="container mx-auto px-6 text-center">
+          <h2 className="text-3xl font-bold mb-8">Ready to Get Started?</h2>
+          <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+            Join hundreds of students, teachers, and judges in making this
+            year's science fair the best one yet.
+          </p>
+          <Button
+            variant="secondary"
+            size="lg"
+            className="flex items-center gap-2"
+            onClick={handleLogin}
           >
-            Login
+            Get Started
+            <ArrowRight className="h-5 w-5" />
           </Button>
-        </Box>
-      </Box>
+        </div>
+      </section>
 
-      {/* Why FairTech Section */}
-      <Box //This section has the background of the application and a spot for the user to contact the application owner
-        sx={{
-          backgroundColor: '#f8f9fa', //light grey color
-          padding: '20px',
-          color: '#5a2b8c',
-          borderRadius: '8px',
-          marginBottom: '100px',
-        }}
-      >
-        <Typography variant="h5" gutterBottom>
-          Why use the Southern Minnesota Science Fair Platform?
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          We have all the tools you need for your events. Online registration,
-          communication, judging, and so much more! <br />
-          Looking to get your own fair running? Send us a message!
-        </Typography>
-        <Button //Another button that navigates to the Contact Us page
-          variant="contained"
-          sx={{ backgroundColor: '#5a2b8c', color: '#ffffff' }}
-        >
-          Contact Us
-        </Button>
-      </Box>
-
-      {/* Footer Section */}
-      <Box //This section has more about the application and it's main features
-        sx={{
-          backgroundColor: '#5a2b8c', //Purple Background
-          padding: '20px',
-          color: '#ffffff',
-          borderRadius: '8px',
-        }}
-      >
-        <Typography variant="body1" gutterBottom>
-          Running a Science fair is not easy. No worries! We've got Paperwork
-          Review, Project Approval, Teacher Access, Science Fair Wizards,
-          Judging, and Awards!
-        </Typography>
-      </Box>
-    </Box>
+      {/* Footer */}
+      <footer className="bg-gray-900 text-gray-400 py-12">
+        <div className="container mx-auto px-6">
+          <div className="grid md:grid-cols-3 gap-8">
+            <div>
+              <h3 className="text-white font-semibold mb-4">Contact</h3>
+              <div className="space-y-2">
+                <p>Email: contact@southernmnsciencefair.org</p>
+                <p>Phone: (555) 123-4567</p>
+              </div>
+            </div>
+            <div>
+              <h3 className="text-white font-semibold mb-4">Important Dates</h3>
+              <div className="space-y-2">
+                <p>Registration Opens: January 1, 2025</p>
+                <p>Project Submission: February 28, 2025</p>
+                <p>Fair Dates: March 15-17, 2025</p>
+              </div>
+            </div>
+            <div>
+              <h3 className="text-white font-semibold mb-4">Quick Links</h3>
+              <div className="space-y-2">
+                <button className="hover:text-white transition-colors">
+                  About Us
+                </button>
+                <button className="hover:text-white transition-colors">
+                  Rules & Guidelines
+                </button>
+                <button className="hover:text-white transition-colors">
+                  Resources
+                </button>
+              </div>
+            </div>
+          </div>
+          <div className="border-t border-gray-800 mt-12 pt-8 text-center">
+            <p>
+              &copy; 2024 Southern Minnesota Science Fair. All rights reserved.
+            </p>
+          </div>
+        </div>
+      </footer>
+    </div>
   );
 };
+
+// Features data
+const features = [
+  {
+    icon: <Users className="h-6 w-6 text-blue-600" />,
+    title: 'Easy Registration',
+    description:
+      'Simple online registration process for students, teachers, and judges. Get started in minutes.',
+  },
+  {
+    icon: <Calendar className="h-6 w-6 text-blue-600" />,
+    title: 'Project Management',
+    description:
+      'Track submissions, manage deadlines, and communicate with participants all in one place.',
+  },
+  {
+    icon: <Award className="h-6 w-6 text-blue-600" />,
+    title: 'Fair Day Support',
+    description:
+      'Digital scoring system, real-time updates, and comprehensive event management tools.',
+  },
+];
+
+// Statistics data
+const stats = [
+  { value: '500+', label: 'Annual Participants' },
+  { value: '50+', label: 'Partner Schools' },
+  { value: '100+', label: 'Volunteer Judges' },
+  { value: '$10K', label: 'In Prizes' },
+];
 
 export default LandingPage;
