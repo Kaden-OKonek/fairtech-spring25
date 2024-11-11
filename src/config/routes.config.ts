@@ -3,7 +3,7 @@ import { RouteConfigMap, UserState } from '../types/auth.types';
 export const routeConfig: RouteConfigMap = {
   '/': {
     requiredState: UserState.UNAUTHENTICATED,
-    fallbackRoute: '/user-type-selection', // Changed from '/dashboard' to '/user-type-selection'
+    fallbackRoute: '/user-type-selection',
     metadata: {
       title: 'Welcome',
       description: 'Landing page for all users',
@@ -11,7 +11,7 @@ export const routeConfig: RouteConfigMap = {
   },
   '/login': {
     requiredState: UserState.UNAUTHENTICATED,
-    fallbackRoute: '/user-type-selection', // Changed from '/dashboard'
+    fallbackRoute: '/user-type-selection',
     metadata: {
       title: 'Login',
     },
@@ -25,7 +25,7 @@ export const routeConfig: RouteConfigMap = {
   },
   '/user-type-selection': {
     requiredState: UserState.UNREGISTERED,
-    fallbackRoute: '/student-dashboard', // Default to student dashboard
+    fallbackRoute: '/student-dashboard',
     metadata: {
       title: 'Select User Type',
     },
@@ -100,6 +100,14 @@ export const routeConfig: RouteConfigMap = {
     fallbackRoute: '/login',
     metadata: {
       title: 'Admin Dashboard',
+    },
+  },
+  '/super-admin-dashboard': {
+    requiredState: UserState.COMPLETE,
+    allowedRoles: ['superAdmin'],
+    fallbackRoute: '/login',
+    metadata: {
+      title: 'Super Admin Dashboard',
     },
   },
 };

@@ -26,3 +26,4 @@ extract_code.sh
 repo_code.txt
 
 .eslintcache
+service-account-key.json

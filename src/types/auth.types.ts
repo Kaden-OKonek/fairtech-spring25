@@ -14,6 +14,7 @@ export type UserRole =
   | 'judge'
   | 'volunteer'
   | 'admin'
+  | 'superAdmin'
   | null;
 
 // Base interface for all user profiles
@@ -108,6 +109,7 @@ export interface AuthContextType {
   logOut: () => Promise<void>;
   setUserRole: (role: UserRole) => Promise<void>;
   completeRegistration: (userData: Partial<UserProfile>) => Promise<void>;
+  checkSuperAdmin: () => Promise<boolean>;
   refreshStatus: () => Promise<void>;
 }
 
