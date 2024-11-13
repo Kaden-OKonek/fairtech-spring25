@@ -92,15 +92,28 @@ export const studentsService = {
 
   async getStudentForms(studentId: string): Promise<FormSubmission[]> {
     const formsRef = collection(db, 'forms');
-    const q = query(formsRef, where('studentId', '==', studentId));
-    const snapshot = await getDocs(q);
+    const formsQuery = query(formsRef, where('studentId', '==', studentId));
+    const formsSnapshot = await getDocs(formsQuery);
 
-    return snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-      uploadDate: doc.data().uploadDate.toDate(),
-      lastUpdated: doc.data().lastUpdated.toDate(),
-    })) as FormSubmission[];
+    return formsSnapshot.docs.map((formDoc) => {
+      const data = formDoc.data();
+      return {
+        id: formDoc.id,
+        ...data,
+        uploadDate: data.uploadDate.toDate(),
+        lastUpdated: data.lastUpdated.toDate(),
+        createdAt: data.createdAt.toDate(),
+        updatedAt: data.updatedAt.toDate(),
+        versions: data.versions.map((version: any) => ({
+          ...version,
+          uploadedAt: version.uploadedAt.toDate(),
+          reviews: version.reviews.map((review: any) => ({
+            ...review,
+            timestamp: review.timestamp.toDate(),
+          })),
+        })),
+      } as FormSubmission;
+    });
   },
 
   async getActiveStudents(): Promise<Student[]> {

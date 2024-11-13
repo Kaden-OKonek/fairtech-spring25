@@ -1,181 +1,198 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
   Button,
-  Input,
-  CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
   Alert,
+  CircularProgress,
 } from '@mui/material';
-import { CloudUpload as CloudUploadIcon } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
-import { getAuth } from 'firebase/auth';
-import { useFormUpload } from '../../../hooks/useFormUpload';
+import { Upload } from 'lucide-react';
+import { useAuth } from '../../../contexts/AuthContext';
+import { formsService } from '../../../services/forms.service';
+import FormSubmissionComponent from './FormSubmissionComponent';
+import { FormSubmission } from '../../../types/forms.types';
 
 const PaperworkContent: React.FC = () => {
-  const {
-    selectedFile,
-    isUploading,
-    uploadStatus,
-    errorMessage,
-    handleFileChange,
-    handleUpload,
-  } = useFormUpload();
+  const [forms, setForms] = useState<FormSubmission[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitDialogOpen, setIsSubmitDialogOpen] = useState(false);
+  const [newFormTitle, setNewFormTitle] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const navigate = useNavigate();
-  const auth = getAuth();
+  const { authStatus } = useAuth();
 
-  const handleGoToQuestionnaire = () => {
-    navigate('/form-questionnaire');
+  useEffect(() => {
+    if (!authStatus.user?.uid) return;
+
+    const unsubscribe = formsService.subscribeToForms(
+      authStatus.user.uid,
+      'student',
+      (updatedForms) => {
+        setForms(updatedForms);
+        setLoading(false);
+      }
+    );
+
+    return () => unsubscribe();
+  }, [authStatus.user?.uid]);
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      const file = event.target.files[0];
+      if (file.type === 'application/pdf') {
+        setSelectedFile(file);
+      } else {
+        setError('Please select a PDF file');
+      }
+    }
   };
 
-  return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 4,
-        alignItems: 'center',
-        padding: 4,
-      }}
-    >
-      <Typography variant="h4" gutterBottom>
-        Paperwork
-      </Typography>
+  const handleSubmitNewForm = async () => {
+    if (!selectedFile || !authStatus.user?.uid) return;
 
-      {/* Custom Information Section */}
+    setIsSubmitting(true);
+    try {
+      await formsService.submitNewForm(
+        authStatus.user.uid,
+        `${authStatus.metadata?.firstName} ${authStatus.metadata?.lastName}`,
+        newFormTitle,
+        selectedFile,
+        'general' // You might want to add form type selection
+      );
+
+      setIsSubmitDialogOpen(false);
+      setNewFormTitle('');
+      setSelectedFile(null);
+      setError(null);
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      setError('Failed to submit form. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleUploadNewVersion = async (formId: string, file: File) => {
+    if (!authStatus.user?.uid) return;
+
+    try {
+      await formsService.uploadNewVersion(formId, file, authStatus.user.uid);
+    } catch (error) {
+      console.error('Error uploading new version:', error);
+      setError('Failed to upload new version. Please try again.');
+    }
+  };
+
+  if (loading) {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="400px"
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  return (
+    <Box>
       <Box
         sx={{
-          backgroundColor: '#f9f9f9',
-          borderRadius: 2,
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-          padding: 4,
-          width: '100%',
-          maxWidth: '800px',
-          textAlign: 'center',
+          mb: 4,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
         }}
       >
-        {/* Questionnaire Section */}
-        <Box sx={{ marginBottom: 6 }}>
-          <Typography variant="h5" sx={{ marginBottom: 3, color: '#555' }}>
-            Not sure what documents you need? Complete the{' '}
-            <strong>Form Questionnaire</strong> to get a customized list.
-          </Typography>
-
-          <Button
-            onClick={handleGoToQuestionnaire}
-            variant="contained"
-            color="primary"
-            sx={{
-              backgroundColor: '#512da8',
-              fontSize: '1.2rem',
-              padding: '12px 24px',
-              height: '60px',
-              marginBottom: 3,
-              '&:hover': { backgroundColor: '#4527a0' },
-            }}
-          >
-            Form Questionnaire
-          </Button>
-
-          <Typography variant="body1" sx={{ marginBottom: 2, color: '#666' }}>
-            If your project conditions have changed, you can retake the
-            questionnaire anytime by going to the Form Questionnaire under
-            paperwork.
-          </Typography>
-
-          <Typography variant="body1" sx={{ color: '#666' }}>
-            To track the review status of your uploaded files, visit{' '}
-            <strong>My Documents</strong> under Paperwork.
-          </Typography>
-        </Box>
-
-        {/* Upload Section */}
-        <Box sx={{ marginTop: 4 }}>
-          <Typography variant="h6" sx={{ marginBottom: 2, color: '#333' }}>
-            Upload New Form
-          </Typography>
-
-          {!auth.currentUser && (
-            <Alert severity="warning" sx={{ marginBottom: 2 }}>
-              Please login to upload files.
-            </Alert>
-          )}
-
-          {auth.currentUser && !auth.currentUser.emailVerified && (
-            <Alert severity="warning" sx={{ marginBottom: 2 }}>
-              Please verify your email before uploading files.
-            </Alert>
-          )}
-
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 2,
-              alignItems: 'center',
-            }}
-          >
-            <Input
-              type="file"
-              onChange={handleFileChange}
-              sx={{ display: 'none' }}
-              id="pdf-upload-input"
-              inputProps={{ accept: '.pdf' }}
-            />
-            <label htmlFor="pdf-upload-input">
-              <Button
-                variant="contained"
-                component="span"
-                startIcon={<CloudUploadIcon />}
-                sx={{
-                  backgroundColor: '#512da8',
-                  padding: '8px 24px',
-                  '&:hover': { backgroundColor: '#4527a0' },
-                }}
-              >
-                Select PDF
-              </Button>
-            </label>
-
-            {selectedFile && (
-              <Typography variant="body2" sx={{ color: '#333' }}>
-                Selected: {selectedFile.name}
-              </Typography>
-            )}
-
-            <Button
-              variant="contained"
-              onClick={handleUpload}
-              disabled={
-                !selectedFile ||
-                isUploading ||
-                !auth.currentUser ||
-                !auth.currentUser.emailVerified
-              }
-              sx={{
-                backgroundColor: '#512da8',
-                width: '200px',
-                '&:hover': { backgroundColor: '#4527a0' },
-              }}
-            >
-              {isUploading ? (
-                <CircularProgress size={24} color="inherit" />
-              ) : (
-                'Upload PDF'
-              )}
-            </Button>
-
-            {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
-
-            {uploadStatus === 'success' && (
-              <Alert severity="success">
-                File uploaded successfully! It will be reviewed shortly.
-              </Alert>
-            )}
-          </Box>
-        </Box>
+        <Typography variant="h4" color="primary" fontWeight="bold">
+          My Forms
+        </Typography>
+        <Button
+          variant="contained"
+          startIcon={<Upload />}
+          onClick={() => setIsSubmitDialogOpen(true)}
+        >
+          Submit New Form
+        </Button>
       </Box>
+
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
+          {error}
+        </Alert>
+      )}
+
+      {forms.length === 0 ? (
+        <Alert severity="info">
+          You haven't submitted any forms yet. Click "Submit New Form" to get
+          started.
+        </Alert>
+      ) : (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {forms.map((form) => (
+            <FormSubmissionComponent
+              key={form.id}
+              form={form}
+              onUploadNewVersion={handleUploadNewVersion}
+            />
+          ))}
+        </Box>
+      )}
+
+      {/* Submit New Form Dialog */}
+      <Dialog
+        open={isSubmitDialogOpen}
+        onClose={() => setIsSubmitDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Submit New Form</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Form Title"
+            fullWidth
+            variant="outlined"
+            value={newFormTitle}
+            onChange={(e) => setNewFormTitle(e.target.value)}
+            sx={{ mb: 2 }}
+          />
+          <Button variant="outlined" component="label" fullWidth>
+            Select PDF File
+            <input
+              type="file"
+              hidden
+              accept=".pdf"
+              onChange={handleFileSelect}
+            />
+          </Button>
+          {selectedFile && (
+            <Typography variant="body2" sx={{ mt: 1 }}>
+              Selected file: {selectedFile.name}
+            </Typography>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsSubmitDialogOpen(false)}>Cancel</Button>
+          <Button
+            onClick={handleSubmitNewForm}
+            variant="contained"
+            disabled={!selectedFile || !newFormTitle || isSubmitting}
+          >
+            {isSubmitting ? 'Submitting...' : 'Submit'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

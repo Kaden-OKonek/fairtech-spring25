@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Box,
   Typography,
@@ -10,7 +10,12 @@ import {
   useTheme,
   Divider,
 } from '@mui/material';
-import { ClipboardList, Microscope, Settings } from 'lucide-react';
+import {
+  ClipboardList,
+  Microscope,
+  Settings,
+  FileQuestion,
+} from 'lucide-react';
 import LogoutButton from '../LogoutButton';
 import { ContentType } from '../../types/studentDashboard';
 import { useAuth } from '../../contexts/AuthContext';
@@ -18,23 +23,18 @@ import { useAuth } from '../../contexts/AuthContext';
 interface SidebarProps {
   activeContent: ContentType;
   onContentChange: (content: ContentType) => void;
-  reviewedFormsCount: number;
+  pendingFormsCount?: number;
+  reviewedFormsCount?: number;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
   activeContent,
   onContentChange,
-  reviewedFormsCount,
+  pendingFormsCount = 0,
 }) => {
   const theme = useTheme();
   const { authStatus } = useAuth();
   const userName = authStatus.metadata?.firstName || 'Student';
-  const [isPaperworkExpanded, setIsPaperworkExpanded] = useState(false);
-
-  const handlePaperworkClick = () => {
-    setIsPaperworkExpanded((prev) => !prev);
-    onContentChange('paperwork'); // Set the main content to Paperwork on click
-  };
 
   return (
     <Box
@@ -47,16 +47,9 @@ const Sidebar: React.FC<SidebarProps> = ({
         height: '100vh',
       }}
     >
-      <Box
-        sx={{
-          p: 3,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}
-      >
+      <Box sx={{ p: 3 }}>
         <Typography variant="h5" color="primary" fontWeight="bold">
-          Student Panel
+          Student Portal
         </Typography>
       </Box>
 
@@ -72,10 +65,9 @@ const Sidebar: React.FC<SidebarProps> = ({
       </Box>
 
       <List sx={{ px: 2, flexGrow: 1 }}>
-        {/* Paperwork Section with Dropdown */}
         <ListItem disablePadding sx={{ mb: 1 }}>
           <ListItemButton
-            onClick={handlePaperworkClick}
+            onClick={() => onContentChange('paperwork')}
             selected={activeContent === 'paperwork'}
             sx={{
               borderRadius: '12px',
@@ -88,10 +80,10 @@ const Sidebar: React.FC<SidebarProps> = ({
             }}
           >
             <ClipboardList size={20} />
-            <ListItemText primary="My Paperwork" sx={{ ml: 2 }} />
-            {reviewedFormsCount > 0 && (
+            <ListItemText primary="My Forms" sx={{ ml: 2 }} />
+            {pendingFormsCount > 0 && (
               <Badge
-                badgeContent={reviewedFormsCount}
+                badgeContent={pendingFormsCount}
                 color="error"
                 sx={{
                   '& .MuiBadge-badge': {
@@ -103,49 +95,25 @@ const Sidebar: React.FC<SidebarProps> = ({
           </ListItemButton>
         </ListItem>
 
-        {/* Paperwork Dropdown Items */}
-        {isPaperworkExpanded && (
-          <>
-            <ListItem disablePadding sx={{ mb: 1 }}>
-              <ListItemButton
-                onClick={() => onContentChange('form-questionnaire')}
-                selected={activeContent === 'form-questionnaire'}
-                sx={{
-                  pl: 6,
-                  borderRadius: '12px',
-                  '&.Mui-selected': {
-                    backgroundColor: 'primary.lighter',
-                    '&:hover': {
-                      backgroundColor: 'primary.light',
-                    },
-                  },
-                }}
-              >
-                <ListItemText primary="Form Questionnaire" />
-              </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding sx={{ mb: 1 }}>
-              <ListItemButton
-                onClick={() => onContentChange('my-documents')}
-                selected={activeContent === 'my-documents'}
-                sx={{
-                  pl: 6,
-                  borderRadius: '12px',
-                  '&.Mui-selected': {
-                    backgroundColor: 'primary.lighter',
-                    '&:hover': {
-                      backgroundColor: 'primary.light',
-                    },
-                  },
-                }}
-              >
-                <ListItemText primary="My Documents" />
-              </ListItemButton>
-            </ListItem>
-          </>
-        )}
+        <ListItem disablePadding sx={{ mb: 1 }}>
+          <ListItemButton
+            onClick={() => onContentChange('form-questionnaire')}
+            selected={activeContent === 'form-questionnaire'}
+            sx={{
+              borderRadius: '12px',
+              '&.Mui-selected': {
+                backgroundColor: 'primary.lighter',
+                '&:hover': {
+                  backgroundColor: 'primary.light',
+                },
+              },
+            }}
+          >
+            <FileQuestion size={20} />
+            <ListItemText primary="Form Requirements" sx={{ ml: 2 }} />
+          </ListItemButton>
+        </ListItem>
 
-        {/* Projects Button */}
         <ListItem disablePadding sx={{ mb: 1 }}>
           <ListItemButton
             onClick={() => onContentChange('projects')}
@@ -165,7 +133,6 @@ const Sidebar: React.FC<SidebarProps> = ({
           </ListItemButton>
         </ListItem>
 
-        {/* Settings Button */}
         <ListItem disablePadding sx={{ mb: 1 }}>
           <ListItemButton
             onClick={() => onContentChange('settings')}
