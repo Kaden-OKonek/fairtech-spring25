@@ -11,7 +11,8 @@ import { useAuth } from '../contexts/AuthContext';
 
 const StudentDashboard: React.FC = () => {
   const [activeContent, setActiveContent] = useState<ContentType>('projects');
-  const [reviewedFormsCount] = useState(0);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [reviewedFormsCount, setReviewedFormsCount] = useState<number>(0);
   const { authStatus } = useAuth();
 
   const renderContent = () => {
