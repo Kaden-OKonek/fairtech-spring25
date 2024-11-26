@@ -31,6 +31,7 @@ export interface BaseProfile {
   registrationCompletedAt?: Date;
   updatedAt: Date;
   createdAt: Date;
+  classCode?: string;
 }
 
 // Student-specific profile interface
@@ -50,6 +51,7 @@ export interface TeacherProfile extends BaseProfile {
   userType: 'teacher';
   school: string;
   department: string;
+  classCode: string;
 }
 
 // Judge-specific profile interface

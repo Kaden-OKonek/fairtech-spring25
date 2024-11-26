@@ -11,9 +11,11 @@ import {
   AppBar,
   Toolbar,
   Alert,
+  CircularProgress,
 } from '@mui/material';
 import { styled } from '@mui/system';
 import { useAuth } from '../contexts/AuthContext';
+import { teacherService } from '../services/teacher.service';
 import LogoutButton from '../components/LogoutButton';
 
 const validationSchema = Yup.object().shape({
@@ -29,6 +31,7 @@ const validationSchema = Yup.object().shape({
     .matches(/^[0-9]{5}$/, 'Zip code must be 5 digits')
     .required('Zip code is required'),
   school: Yup.string().required('School is required'),
+  department: Yup.string(),
 });
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
@@ -49,17 +52,25 @@ const TeacherRegistration: React.FC = () => {
   const [registrationError, setRegistrationError] = useState<string | null>(
     null
   );
+  const [classCode, setClassCode] = useState<string>('');
+  const [isGeneratingCode, setIsGeneratingCode] = useState(false);
 
-  const initialValues = {
-    firstName: '',
-    lastName: '',
-    phone: '',
-    address: '',
-    city: '',
-    state: '',
-    zipCode: '',
-    school: '',
+  const generateClassCode = async () => {
+    try {
+      setIsGeneratingCode(true);
+      const code = await teacherService.generateUniqueClassCode();
+      setClassCode(code);
+    } catch (error) {
+      console.error('Error generating class code:', error);
+      setRegistrationError('Failed to generate class code');
+    } finally {
+      setIsGeneratingCode(false);
+    }
   };
+
+  React.useEffect(() => {
+    generateClassCode();
+  }, []);
 
   const handleSubmit = async (values: any, { setSubmitting }: any) => {
     try {
@@ -69,13 +80,22 @@ const TeacherRegistration: React.FC = () => {
         throw new Error('User not authenticated');
       }
 
+      if (!classCode) {
+        throw new Error('Class code generation failed');
+      }
+
       const registrationData = {
         ...values,
         userType: 'teacher',
+        classCode,
+        status: 'active',
       };
 
+      // Register the teacher
       await completeRegistration(registrationData);
-      // AccessGuard will handle navigation to teacher dashboard
+
+      // Create the initial class document
+      await teacherService.initializeClass(authStatus.user.uid, classCode);
     } catch (error) {
       console.error('Registration error:', error);
       setRegistrationError(
@@ -107,8 +127,54 @@ const TeacherRegistration: React.FC = () => {
             </Alert>
           )}
 
+          <Box sx={{ mb: 4 }}>
+            <Typography variant="h6" gutterBottom>
+              Your Class Code
+            </Typography>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 2,
+                bgcolor: 'grey.100',
+                p: 2,
+                borderRadius: 1,
+              }}
+            >
+              {isGeneratingCode ? (
+                <CircularProgress size={24} />
+              ) : (
+                <>
+                  <Typography variant="h5" fontWeight="bold">
+                    {classCode}
+                  </Typography>
+                  <Button
+                    size="small"
+                    onClick={generateClassCode}
+                    disabled={isGeneratingCode}
+                  >
+                    Generate New Code
+                  </Button>
+                </>
+              )}
+            </Box>
+            <Typography variant="caption" color="text.secondary">
+              Share this code with your students to let them join your class
+            </Typography>
+          </Box>
+
           <Formik
-            initialValues={initialValues}
+            initialValues={{
+              firstName: '',
+              lastName: '',
+              phone: '',
+              address: '',
+              city: '',
+              state: '',
+              zipCode: '',
+              school: '',
+              department: '',
+            }}
             validationSchema={validationSchema}
             onSubmit={handleSubmit}
           >
@@ -193,6 +259,16 @@ const TeacherRegistration: React.FC = () => {
                       label="School"
                       error={touched.school && Boolean(errors.school)}
                       helperText={touched.school && errors.school}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Field
+                      as={TextField}
+                      fullWidth
+                      name="department"
+                      label="Department (Optional)"
+                      error={touched.department && Boolean(errors.department)}
+                      helperText={touched.department && errors.department}
                     />
                   </Grid>
                 </Grid>

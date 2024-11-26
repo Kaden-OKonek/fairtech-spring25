@@ -11,6 +11,7 @@ import {
   updateDoc,
   arrayUnion,
   increment,
+  Unsubscribe,
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../firebase';
@@ -19,6 +20,9 @@ import {
   ReviewStatus,
   ReviewerRole,
   FormVersion,
+  FormType,
+  FormRequirement,
+  ProjectContext,
 } from '../types/forms.types';
 
 interface ReviewerData {
@@ -33,23 +37,22 @@ interface ReviewerData {
 }
 
 export const formsService = {
-  // Subscribe to forms with realtime updates
+  // Legacy method for backward compatibility
   subscribeToForms(
     userId: string,
     role: string,
     callback: (forms: FormSubmission[]) => void
-  ) {
+  ): Unsubscribe {
     const formsRef = collection(db, 'forms');
     let q = query(formsRef, orderBy('updatedAt', 'desc')); // Default query
 
-    // Different queries based on user role
     if (role === 'student') {
       q = query(
         formsRef,
         where('studentId', '==', userId),
         orderBy('updatedAt', 'desc')
       );
-    } // Admin users will see all forms (default query)
+    }
 
     return onSnapshot(q, (snapshot) => {
       const forms = snapshot.docs.map((doc) => {
@@ -76,7 +79,7 @@ export const formsService = {
     });
   },
 
-  // Submit a new form
+  // Legacy method for backward compatibility
   async submitNewForm(
     studentId: string,
     studentName: string,
@@ -85,7 +88,6 @@ export const formsService = {
     formType: string
   ): Promise<string> {
     try {
-      // 1. Upload file to storage
       const timestamp = new Date();
       const storageRef = ref(
         storage,
@@ -94,7 +96,6 @@ export const formsService = {
       const uploadResult = await uploadBytes(storageRef, file);
       const downloadURL = await getDownloadURL(uploadResult.ref);
 
-      // 2. Create form document
       const newVersion: FormVersion = {
         versionNumber: 1,
         fileUrl: downloadURL,
@@ -104,34 +105,25 @@ export const formsService = {
         status: 'pending',
       };
 
-      const newForm: Omit<FormSubmission, 'id'> = {
+      const docRef = await addDoc(collection(db, 'forms'), {
         studentId,
         studentName,
         title,
         fileName: file.name,
-        uploadDate: timestamp,
-        lastUpdated: timestamp,
-        currentVersion: 0,
-        versions: [newVersion],
-        reviewers: [],
-        createdAt: timestamp,
-        updatedAt: timestamp,
-        status: 'pending',
-        formType,
-      };
-
-      const docRef = await addDoc(collection(db, 'forms'), {
-        ...newForm,
+        formType: formType as FormType,
         uploadDate: Timestamp.fromDate(timestamp),
         lastUpdated: Timestamp.fromDate(timestamp),
-        createdAt: Timestamp.fromDate(timestamp),
-        updatedAt: Timestamp.fromDate(timestamp),
+        currentVersion: 0,
         versions: [
           {
             ...newVersion,
             uploadedAt: Timestamp.fromDate(timestamp),
           },
         ],
+        reviewers: [],
+        createdAt: Timestamp.fromDate(timestamp),
+        updatedAt: Timestamp.fromDate(timestamp),
+        status: 'pending',
       });
 
       return docRef.id;
@@ -141,11 +133,155 @@ export const formsService = {
     }
   },
 
-  // Upload a new version
+  // Subscribe to forms with realtime updates
+  subscribeToProjectForms(
+    projectId: string,
+    callback: (forms: FormSubmission[]) => void
+  ) {
+    const formsRef = collection(db, 'forms');
+    const q = query(
+      formsRef,
+      where('projectContext.projectId', '==', projectId),
+      orderBy('updatedAt', 'desc')
+    );
+
+    return onSnapshot(q, (snapshot) => {
+      const forms = snapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          uploadDate: data.uploadDate.toDate(),
+          lastUpdated: data.lastUpdated.toDate(),
+          createdAt: data.createdAt.toDate(),
+          updatedAt: data.updatedAt.toDate(),
+          projectContext: {
+            ...data.projectContext,
+            assignedAt: data.projectContext.assignedAt.toDate(),
+          },
+          versions: data.versions.map((version: any) => ({
+            ...version,
+            uploadedAt: version.uploadedAt.toDate(),
+            reviews: version.reviews.map((review: any) => ({
+              ...review,
+              timestamp: review.timestamp.toDate(),
+            })),
+          })),
+        } as FormSubmission;
+      });
+
+      callback(forms);
+    });
+  },
+
+  // Subscribe to forms assigned to a specific student within a project
+  subscribeToStudentProjectForms(
+    projectId: string,
+    studentId: string,
+    callback: (forms: FormSubmission[]) => void
+  ) {
+    const formsRef = collection(db, 'forms');
+    const q = query(
+      formsRef,
+      where('projectContext.projectId', '==', projectId),
+      where('projectContext.responsibleStudentId', '==', studentId),
+      orderBy('updatedAt', 'desc')
+    );
+
+    return onSnapshot(q, (snapshot) => {
+      const forms = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+        uploadDate: doc.data().uploadDate.toDate(),
+        lastUpdated: doc.data().lastUpdated.toDate(),
+        createdAt: doc.data().createdAt.toDate(),
+        updatedAt: doc.data().updatedAt.toDate(),
+        projectContext: {
+          ...doc.data().projectContext,
+          assignedAt: doc.data().projectContext.assignedAt.toDate(),
+        },
+        versions: doc.data().versions.map((version: any) => ({
+          ...version,
+          uploadedAt: version.uploadedAt.toDate(),
+          reviews: version.reviews.map((review: any) => ({
+            ...review,
+            timestamp: review.timestamp.toDate(),
+          })),
+        })),
+      })) as FormSubmission[];
+
+      callback(forms);
+    });
+  },
+
+  // Submit a new form
+  async submitProjectForm(
+    projectContext: ProjectContext,
+    title: string,
+    file: File,
+    formType: FormType,
+    isRequired: boolean,
+    dueDate?: Date
+  ): Promise<string> {
+    try {
+      const timestamp = new Date();
+
+      // 1. Upload file to storage
+      const storageRef = ref(
+        storage,
+        `projects/${projectContext.projectId}/forms/${timestamp.getTime()}_${file.name}`
+      );
+      const uploadResult = await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(uploadResult.ref);
+
+      // 2. Create new version
+      const newVersion: FormVersion = {
+        versionNumber: 1,
+        fileUrl: downloadURL,
+        uploadedAt: timestamp,
+        uploadedBy: projectContext.responsibleStudentId,
+        reviews: [],
+        status: 'pending',
+      };
+
+      // 3. Create form document
+      const docRef = await addDoc(collection(db, 'forms'), {
+        title,
+        fileName: file.name,
+        formType,
+        projectContext: {
+          ...projectContext,
+          assignedAt: Timestamp.fromDate(timestamp),
+        },
+        uploadDate: Timestamp.fromDate(timestamp),
+        lastUpdated: Timestamp.fromDate(timestamp),
+        currentVersion: 0,
+        versions: [
+          {
+            ...newVersion,
+            uploadedAt: Timestamp.fromDate(timestamp),
+          },
+        ],
+        reviewers: [],
+        createdAt: Timestamp.fromDate(timestamp),
+        updatedAt: Timestamp.fromDate(timestamp),
+        status: 'pending',
+        isRequired,
+        ...(dueDate && { dueDate: Timestamp.fromDate(dueDate) }),
+      });
+
+      return docRef.id;
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      throw error;
+    }
+  },
+
+  // Upload a new version of a form
   async uploadNewVersion(
     formId: string,
     file: File,
-    studentId: string
+    uploaderId: string
   ): Promise<void> {
     try {
       const formRef = doc(db, 'forms', formId);
@@ -162,7 +298,7 @@ export const formsService = {
       // 1. Upload new file version
       const storageRef = ref(
         storage,
-        `forms/${studentId}/${timestamp.getTime()}_v${newVersionNumber}_${file.name}`
+        `projects/${form.projectContext.projectId}/forms/${timestamp.getTime()}_v${newVersionNumber}_${file.name}`
       );
       const uploadResult = await uploadBytes(storageRef, file);
       const downloadURL = await getDownloadURL(uploadResult.ref);
@@ -172,7 +308,7 @@ export const formsService = {
         versionNumber: newVersionNumber,
         fileUrl: downloadURL,
         uploadedAt: timestamp,
-        uploadedBy: studentId,
+        uploadedBy: uploaderId,
         reviews: [],
         status: 'pending',
       };
@@ -193,6 +329,21 @@ export const formsService = {
       console.error('Error uploading new version:', error);
       throw error;
     }
+  },
+
+  // Get form requirements for a project
+  async getProjectFormRequirements(
+    projectId: string
+  ): Promise<FormRequirement[]> {
+    const projectRef = doc(db, 'projects', projectId);
+    const projectDoc = await getDoc(projectRef);
+
+    if (!projectDoc.exists()) {
+      throw new Error('Project not found');
+    }
+
+    const data = projectDoc.data();
+    return (data.formRequirements || []) as FormRequirement[];
   },
 
   // Assign reviewer - only admin users can be assigned
