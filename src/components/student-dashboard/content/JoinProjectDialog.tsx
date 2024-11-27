@@ -1,5 +1,3 @@
-// components/student-dashboard/content/JoinProjectDialog.tsx
-
 import React, { useState } from 'react';
 import {
   Dialog,

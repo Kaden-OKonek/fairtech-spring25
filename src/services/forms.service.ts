@@ -37,7 +37,7 @@ interface ReviewerData {
 }
 
 export const formsService = {
-  // Legacy method for backward compatibility
+  // Legacy method for backward compatibility - Will be removed in future update
   subscribeToForms(
     userId: string,
     role: string,
@@ -79,7 +79,7 @@ export const formsService = {
     });
   },
 
-  // Legacy method for backward compatibility
+  // Legacy method for backward compatibility - Will be removed in future update
   async submitNewForm(
     studentId: string,
     studentName: string,

@@ -1,5 +1,3 @@
-// pages/TeacherDashboard.tsx
-
 import React, { useState, useEffect } from 'react';
 import { Box, Container } from '@mui/material';
 import Sidebar from '../components/teacher-dashboard/Sidebar';

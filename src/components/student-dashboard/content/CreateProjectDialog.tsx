@@ -140,7 +140,6 @@ const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({
         throw new Error('You already have an active project');
       }
 
-      // Prepare adult sponsor data
       // Prepare adult sponsor data - with proper type checking and defaults
       const adultSponsorData: AdultSponsor = {
         name: useTeacherAsSponsor
