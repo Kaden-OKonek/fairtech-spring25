@@ -55,6 +55,26 @@
         { "fieldPath": "grade", "order": "ASCENDING" },
         { "fieldPath": "userType", "order": "ASCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "forms",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "projectContext.projectId", "order": "ASCENDING" },
+        { "fieldPath": "updatedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "forms",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "projectContext.projectId", "order": "ASCENDING" },
+        {
+          "fieldPath": "projectContext.responsibleStudentId",
+          "order": "ASCENDING"
+        },
+        { "fieldPath": "updatedAt", "order": "DESCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

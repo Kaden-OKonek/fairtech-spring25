@@ -6,7 +6,34 @@ export type ReviewStatus =
   | 'needs_revision'
   | 'approved'
   | 'rejected';
+
 export type ReviewerRole = 'primary' | 'secondary' | 'final';
+
+export type FormType =
+  // Required per student
+  | '1B'
+  // Required project
+  | '1'
+  | '1A'
+  | 'research_plan'
+  | 'abstract'
+  // Extras
+  | '1C'
+  | '2'
+  | '3'
+  | '4'
+  | '5A'
+  | '5B'
+  | '6A'
+  | '6B'
+  | '7';
+
+export interface ProjectContext {
+  projectId: string;
+  projectName: string;
+  responsibleStudentId: string; // The student responsible for this form
+  assignedAt: Date;
+}
 
 export interface ReviewerAssignment {
   userId: string;
@@ -44,6 +71,8 @@ export interface FormSubmission {
   studentName: string;
   title: string;
   fileName: string;
+  formType: FormType;
+  projectContext: ProjectContext;
   uploadDate: Date;
   lastUpdated: Date;
   currentVersion: number;
@@ -52,6 +81,17 @@ export interface FormSubmission {
   createdAt: Date;
   updatedAt: Date;
   status: ReviewStatus;
-  formType: string;
   comments?: string;
+  isRequired: boolean;
+}
+
+export interface FormRequirement {
+  formType: FormType;
+  isRequired: boolean;
+  description: string;
+}
+
+export interface ProjectFormConfig {
+  projectId: string;
+  requiredForms: FormRequirement[];
 }

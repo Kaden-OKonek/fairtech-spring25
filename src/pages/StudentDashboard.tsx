@@ -6,7 +6,6 @@ import PaperworkContent from '../components/student-dashboard/content/PaperworkC
 import AccountSettingsContent from '../components/student-dashboard/content/AccountSettingsContent';
 import { ContentType } from '../types/studentDashboard';
 import FormQuestions from '../components/student-dashboard/content/FormQuestions';
-import DocumentsPage from '../components/student-dashboard/content/MyDocuments';
 import { useAuth } from '../contexts/AuthContext';
 
 const StudentDashboard: React.FC = () => {
@@ -21,8 +20,6 @@ const StudentDashboard: React.FC = () => {
         return <PaperworkContent />;
       case 'form-questionnaire':
         return <FormQuestions />;
-      case 'my-documents':
-        return <DocumentsPage />;
       case 'projects':
         return <ProjectsContent />;
       case 'settings':

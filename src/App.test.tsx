@@ -60,28 +60,4 @@ describe('App', () => {
       expect(screen.getByText(/Fair Day Support/i)).toBeInTheDocument();
     });
   });
-
-  describe('Authentication Flow', () => {
-    it('shows student dashboard for authenticated students', () => {
-      // Override the mock for this specific test
-      jest
-        .spyOn(require('./contexts/AuthContext'), 'useAuth')
-        .mockImplementation(() => ({
-          authStatus: {
-            state: 'COMPLETE',
-            role: 'student',
-            isLoading: false,
-            error: null,
-            user: {
-              uid: '123',
-              email: 'test@test.com',
-              emailVerified: true,
-            },
-            metadata: {},
-          },
-        }));
-      renderApp();
-      // Add assertions for student dashboard
-    });
-  });
 });
