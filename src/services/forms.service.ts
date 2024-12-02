@@ -217,7 +217,6 @@ export const formsService = {
   // Submit a new form
   async submitProjectForm(
     projectContext: ProjectContext,
-    title: string,
     file: File,
     formType: FormType,
     isRequired: boolean,
@@ -246,7 +245,6 @@ export const formsService = {
 
       // 3. Create form document
       const docRef = await addDoc(collection(db, 'forms'), {
-        title,
         fileName: file.name,
         formType,
         projectContext: {

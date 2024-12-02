@@ -10,22 +10,22 @@ import {
   useTheme,
   Divider,
 } from '@mui/material';
-import { ClipboardList, Users, Settings } from 'lucide-react';
+import { Users, Settings, FolderGit2 } from 'lucide-react';
 import LogoutButton from '../LogoutButton';
 import { useAuth } from '../../contexts/AuthContext';
 
-export type AdminContentType = 'forms' | 'students' | 'settings';
+export type AdminContentType = 'projects' | 'students' | 'settings';
 
 interface SidebarProps {
   activeContent: AdminContentType;
   onContentChange: (content: AdminContentType) => void;
-  pendingFormsCount: number;
+  pendingProjectsCount: number;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
   activeContent,
   onContentChange,
-  pendingFormsCount,
+  pendingProjectsCount,
 }) => {
   const theme = useTheme();
   const { authStatus } = useAuth();
@@ -42,16 +42,9 @@ const Sidebar: React.FC<SidebarProps> = ({
         height: '100vh',
       }}
     >
-      <Box
-        sx={{
-          p: 3,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}
-      >
+      <Box sx={{ p: 3 }}>
         <Typography variant="h5" color="primary" fontWeight="bold">
-          Admin Portal
+          Admin Dashboard
         </Typography>
       </Box>
 
@@ -69,8 +62,8 @@ const Sidebar: React.FC<SidebarProps> = ({
       <List sx={{ px: 2, flexGrow: 1 }}>
         <ListItem disablePadding sx={{ mb: 1 }}>
           <ListItemButton
-            onClick={() => onContentChange('forms')}
-            selected={activeContent === 'forms'}
+            onClick={() => onContentChange('projects')}
+            selected={activeContent === 'projects'}
             sx={{
               borderRadius: '12px',
               '&.Mui-selected': {
@@ -81,11 +74,11 @@ const Sidebar: React.FC<SidebarProps> = ({
               },
             }}
           >
-            <ClipboardList size={20} />
-            <ListItemText primary="Form Reviews" sx={{ ml: 2 }} />
-            {pendingFormsCount > 0 && (
+            <FolderGit2 size={20} />
+            <ListItemText primary="Projects" sx={{ ml: 2 }} />
+            {pendingProjectsCount > 0 && (
               <Badge
-                badgeContent={pendingFormsCount}
+                badgeContent={pendingProjectsCount}
                 color="error"
                 sx={{
                   '& .MuiBadge-badge': {

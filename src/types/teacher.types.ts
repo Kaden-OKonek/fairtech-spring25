@@ -33,7 +33,6 @@ export interface Teacher {
   email: string;
   school: string;
   classCode: string; // Unique class code assigned at registration
-  department?: string;
   phone: string;
   status: TeacherStatus;
   registrationDate: Date;

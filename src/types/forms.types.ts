@@ -32,6 +32,7 @@ export interface ProjectContext {
   projectId: string;
   projectName: string;
   responsibleStudentId: string; // The student responsible for this form
+  responsibleStudentName: string;
   assignedAt: Date;
 }
 

@@ -43,7 +43,6 @@ const ProjectsContent: React.FC = () => {
   // Dialog states
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [joinDialogOpen, setJoinDialogOpen] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [documentsDialogOpen, setDocumentsDialogOpen] = useState(false);
   const [confirmLeaveOpen, setConfirmLeaveOpen] = useState(false);
   const [confirmRemoveOpen, setConfirmRemoveOpen] = useState(false);
@@ -55,26 +54,18 @@ const ProjectsContent: React.FC = () => {
     const uid = authStatus.user?.uid;
     if (!uid) return;
 
-    const loadProject = async () => {
-      try {
-        setLoading(true);
-        const unsubscribe = projectsService.subscribeToStudentProject(
-          uid,
-          (updatedProject) => {
-            setProject(updatedProject);
-            setLoading(false);
-            setError(null);
-          }
-        );
-
-        return () => unsubscribe();
-      } catch (err) {
-        setError('Failed to load project information');
+    setLoading(true);
+    // Subscribe to student's project
+    const unsubscribe = projectsService.subscribeToStudentProject(
+      uid,
+      (updatedProject) => {
+        setProject(updatedProject);
         setLoading(false);
+        setError(null);
       }
-    };
+    );
 
-    loadProject();
+    return () => unsubscribe();
   }, [authStatus.user?.uid]);
 
   const handleCreateProject = () => setCreateDialogOpen(true);
@@ -278,60 +269,66 @@ const ProjectsContent: React.FC = () => {
         onProjectJoined={handleProjectCreated}
       />
 
-      <ProjectDocuments
-        open={documentsDialogOpen}
-        onClose={() => setDocumentsDialogOpen(false)}
-        projectId={project?.id || ''}
-        projectName={project?.name || ''}
-        projectMembers={project?.members || []}
-      />
+      {project && (
+        <>
+          <ProjectDocuments
+            open={documentsDialogOpen}
+            onClose={() => setDocumentsDialogOpen(false)}
+            projectId={project.id}
+            projectName={project.name}
+            projectMembers={project.members}
+          />
 
-      <Dialog
-        open={confirmLeaveOpen}
-        onClose={() => setConfirmLeaveOpen(false)}
-      >
-        <DialogTitle>Leave Project?</DialogTitle>
-        <DialogContent>
-          <Typography>
-            Are you sure you want to leave this project?
-            {isProjectCreator &&
-              ' As the creator, leaving will delete the project if no other members remain.'}
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setConfirmLeaveOpen(false)}>Cancel</Button>
-          <Button
-            onClick={handleLeaveProject}
-            color="error"
-            variant="contained"
+          <Dialog
+            open={confirmLeaveOpen}
+            onClose={() => setConfirmLeaveOpen(false)}
           >
-            Leave Project
-          </Button>
-        </DialogActions>
-      </Dialog>
+            <DialogTitle>Leave Project?</DialogTitle>
+            <DialogContent>
+              <Typography>
+                Are you sure you want to leave this project?
+                {isProjectCreator &&
+                  ' As the creator, leaving will delete the project if no other members remain.'}
+              </Typography>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setConfirmLeaveOpen(false)}>Cancel</Button>
+              <Button
+                onClick={handleLeaveProject}
+                color="error"
+                variant="contained"
+              >
+                Leave Project
+              </Button>
+            </DialogActions>
+          </Dialog>
 
-      <Dialog
-        open={confirmRemoveOpen}
-        onClose={() => setConfirmRemoveOpen(false)}
-      >
-        <DialogTitle>Remove Team Member?</DialogTitle>
-        <DialogContent>
-          <Typography>
-            Are you sure you want to remove {selectedMember?.firstName}{' '}
-            {selectedMember?.lastName} from the project?
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setConfirmRemoveOpen(false)}>Cancel</Button>
-          <Button
-            onClick={handleRemoveMember}
-            color="error"
-            variant="contained"
+          <Dialog
+            open={confirmRemoveOpen}
+            onClose={() => setConfirmRemoveOpen(false)}
           >
-            Remove Member
-          </Button>
-        </DialogActions>
-      </Dialog>
+            <DialogTitle>Remove Team Member?</DialogTitle>
+            <DialogContent>
+              <Typography>
+                Are you sure you want to remove {selectedMember?.firstName}{' '}
+                {selectedMember?.lastName} from the project?
+              </Typography>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setConfirmRemoveOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleRemoveMember}
+                color="error"
+                variant="contained"
+              >
+                Remove Member
+              </Button>
+            </DialogActions>
+          </Dialog>
+        </>
+      )}
     </Box>
   );
 };

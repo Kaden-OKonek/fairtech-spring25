@@ -98,7 +98,6 @@ const StudentsList: React.FC<StudentsListProps> = ({ onViewStudent }) => {
               <TableCell>Email</TableCell>
               <TableCell>School</TableCell>
               <TableCell>Grade</TableCell>
-              <TableCell align="center">Forms</TableCell>
               <TableCell align="center">Status</TableCell>
               <TableCell>Actions</TableCell>
             </TableRow>
@@ -112,21 +111,6 @@ const StudentsList: React.FC<StudentsListProps> = ({ onViewStudent }) => {
                 <TableCell>{student.email}</TableCell>
                 <TableCell>{student.school}</TableCell>
                 <TableCell>{student.grade}</TableCell>
-                <TableCell align="center">
-                  <Box
-                    sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}
-                  >
-                    <Chip
-                      label={`Total: ${student.formSubmissions?.total || 0}`}
-                      size="small"
-                    />
-                    <Chip
-                      label={`Pending: ${student.formSubmissions?.pending || 0}`}
-                      color="warning"
-                      size="small"
-                    />
-                  </Box>
-                </TableCell>
                 <TableCell align="center">
                   <Chip
                     label={student.status}

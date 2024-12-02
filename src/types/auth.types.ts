@@ -50,7 +50,6 @@ export interface VolunteerProfile extends BaseProfile {
 export interface TeacherProfile extends BaseProfile {
   userType: 'teacher';
   school: string;
-  department: string;
   classCode: string;
 }
 

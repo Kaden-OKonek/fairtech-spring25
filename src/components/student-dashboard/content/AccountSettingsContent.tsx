@@ -88,10 +88,8 @@ const AccountSettingsContent: React.FC = () => {
           {renderProfileSpecificFields()}
           <Grid item xs={12}>
             <Button variant="contained" color="primary" sx={{ mr: 2 }}>
+              {/* Not implemented */}
               Update Password
-            </Button>
-            <Button variant="outlined" color="primary">
-              Update Contact Info
             </Button>
           </Grid>
         </Grid>

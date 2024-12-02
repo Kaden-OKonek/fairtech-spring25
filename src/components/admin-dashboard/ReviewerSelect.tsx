@@ -13,7 +13,7 @@ import { usersService } from '../../services/users.service';
 
 interface ReviewerSelectProps {
   value: string | null;
-  onChange: (userId: string | null) => void;
+  onChange: (userId: string | null, userName: string) => void;
   excludeUserIds?: string[];
   label?: string;
 }
@@ -38,7 +38,6 @@ const ReviewerSelect: React.FC<ReviewerSelectProps> = ({
   useEffect(() => {
     const loadAdmins = async () => {
       try {
-        // Get only admin users
         const admins = await usersService.getUsersByRoleAndStatus(
           'admin',
           'active'
@@ -67,7 +66,10 @@ const ReviewerSelect: React.FC<ReviewerSelectProps> = ({
   const selectedUser = options.find((option) => option.id === value) || null;
 
   const handleChange = (_: any, newValue: UserOption | null) => {
-    onChange(newValue?.id || null);
+    const userName = newValue
+      ? `${newValue.firstName} ${newValue.lastName}`.trim()
+      : '';
+    onChange(newValue?.id || null, userName);
   };
 
   const getOptionLabel = (option: UserOption) => {
