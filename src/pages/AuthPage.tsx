@@ -12,12 +12,14 @@ import {
   ListItemIcon,
   ListItemText,
   Collapse,
+  Paper,
 } from '@mui/material';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { auth } from '../firebase';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import { XCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import scienceBackgroundImage from '../assets/images/ScienceBackground.png';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -137,116 +139,205 @@ const AuthPage: React.FC = () => {
   };
 
   return (
-    <Box sx={{ width: '100%', maxWidth: 400, margin: 'auto', mt: 4 }}>
-      <Tabs value={tabValue} onChange={handleTabChange} centered>
-        <Tab label="Login" />
-        <Tab label="Sign Up" />
-      </Tabs>
-
-      {error && (
-        <Box sx={{ color: 'error.main', textAlign: 'center', mt: 2 }}>
-          <Typography variant="body1">{error}</Typography>
-        </Box>
-      )}
-
-      {message && (
-        <Box sx={{ color: 'success.main', textAlign: 'center', mt: 2 }}>
-          <Typography variant="body1">{message}</Typography>
-        </Box>
-      )}
-
-      <TabPanel value={tabValue} index={0}>
-        <form onSubmit={handleLogin}>
-          <TextField
-            fullWidth
-            label="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            margin="normal"
-          />
-          <TextField
-            fullWidth
-            label="Password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            margin="normal"
-          />
-          <Button fullWidth variant="contained" type="submit" sx={{ mt: 2 }}>
-            Login
-          </Button>
-        </form>
-      </TabPanel>
-
-      <TabPanel value={tabValue} index={1}>
-        <form onSubmit={handleSignup}>
-          <TextField
-            fullWidth
-            label="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            margin="normal"
-          />
-          <TextField
-            fullWidth
-            label="Password"
-            type="password"
-            value={password}
-            onChange={handlePasswordChange}
-            onFocus={handlePasswordFocus}
-            onBlur={handlePasswordBlur}
-            margin="normal"
-          />
-          <Collapse in={showPasswordRequirements}>
-            <List dense>
-              {Object.entries(passwordRequirements).map(([key, met]) => (
-                <ListItem key={key}>
-                  <ListItemIcon>
-                    {met ? (
-                      <CheckCircleOutlineIcon color="success" />
-                    ) : (
-                      <ErrorOutlineIcon color="error" />
-                    )}
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={
-                      key === 'length'
-                        ? 'At least 6 characters'
-                        : key === 'lowercase'
-                          ? 'Contains lowercase letter'
-                          : key === 'uppercase'
-                            ? 'Contains uppercase letter'
-                            : 'Contains non-alphanumeric character'
-                    }
-                  />
-                </ListItem>
-              ))}
-            </List>
-          </Collapse>
-          <TextField
-            fullWidth
-            label="Confirm Password"
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            margin="normal"
-          />
-          <Button fullWidth variant="contained" type="submit" sx={{ mt: 2 }}>
-            Sign Up
-          </Button>
-        </form>
-      </TabPanel>
-
-      <Divider sx={{ my: 3 }}>OR</Divider>
-
-      <Button
-        fullWidth
-        variant="outlined"
-        onClick={handleGoogleSignIn}
-        sx={{ mt: 2 }}
+    <Box
+      sx={{
+        position: 'fixed', // Fixed to cover entire viewport
+        top: 0,
+        left: 0,
+        width: '100%',
+        minHeight: '100vh', // Ensure it covers full height
+        backgroundImage: `url(${scienceBackgroundImage})`,
+        backgroundSize: 'cover', // Scale image to cover entire area
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'auto', // Allow scrolling if content exceeds viewport
+      }}
+    >
+      <Box
+        sx={{
+          maxWidth: 500,
+          margin: 'auto',
+          mt: 4,
+          px: 2,
+        }}
       >
-        Sign in with Google
-      </Button>
+        <Paper elevation={3} sx={{ p: 4 }}>
+          <Typography variant="h4" gutterBottom align="center">
+            Welcome to the Southern Minnesota Science Fair
+          </Typography>
+
+          <Tabs
+            value={tabValue}
+            onChange={handleTabChange}
+            centered
+            sx={{
+              mb: 3,
+              '& .MuiTabs-indicator': {
+                backgroundColor: 'primary.main',
+              },
+              '& .MuiTab-root': {
+                textTransform: 'none',
+                '&.Mui-selected': {
+                  color: 'primary.main',
+                },
+              },
+            }}
+          >
+            <Tab label="Login" />
+            <Tab label="Sign Up" />
+          </Tabs>
+
+          {error && (
+            <Box sx={{ mb: 2 }}>
+              <Typography
+                variant="body2"
+                color="error"
+                align="center"
+                sx={{
+                  backgroundColor: 'error.light',
+                  color: 'error.main',
+                  p: 1,
+                  borderRadius: 1,
+                }}
+              >
+                {error}
+              </Typography>
+            </Box>
+          )}
+
+          {message && (
+            <Box sx={{ mb: 2 }}>
+              <Typography
+                variant="body2"
+                align="center"
+                sx={{
+                  backgroundColor: 'success.light',
+                  color: 'success.main',
+                  p: 1,
+                  borderRadius: 1,
+                }}
+              >
+                {message}
+              </Typography>
+            </Box>
+          )}
+
+          <TabPanel value={tabValue} index={0}>
+            <form onSubmit={handleLogin}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <TextField
+                  fullWidth
+                  label="Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+                <TextField
+                  fullWidth
+                  label="Password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <Button
+                  fullWidth
+                  variant="contained"
+                  type="submit"
+                  size="large"
+                  sx={{ mt: 1 }}
+                >
+                  Login
+                </Button>
+              </Box>
+            </form>
+          </TabPanel>
+
+          <TabPanel value={tabValue} index={1}>
+            <form onSubmit={handleSignup}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <TextField
+                  fullWidth
+                  label="Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+                <TextField
+                  fullWidth
+                  label="Password"
+                  type="password"
+                  value={password}
+                  onChange={handlePasswordChange}
+                  onFocus={handlePasswordFocus}
+                  onBlur={handlePasswordBlur}
+                />
+                <Collapse in={showPasswordRequirements}>
+                  <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+                    <List dense>
+                      {Object.entries(passwordRequirements).map(
+                        ([key, met]) => (
+                          <ListItem key={key} sx={{ py: 0.5 }}>
+                            <ListItemIcon sx={{ minWidth: 36 }}>
+                              {met ? (
+                                <CheckCircleOutlineIcon className="w-5 h-5 text-green-500" />
+                              ) : (
+                                <XCircle className="w-5 h-5 text-red-500" />
+                              )}
+                            </ListItemIcon>
+                            <ListItemText
+                              primary={
+                                <Typography
+                                  variant="body2"
+                                  color="textSecondary"
+                                >
+                                  {key === 'length'
+                                    ? 'At least 6 characters'
+                                    : key === 'lowercase'
+                                      ? 'Contains lowercase letter'
+                                      : key === 'uppercase'
+                                        ? 'Contains uppercase letter'
+                                        : 'Contains non-alphanumeric character'}
+                                </Typography>
+                              }
+                            />
+                          </ListItem>
+                        )
+                      )}
+                    </List>
+                  </Paper>
+                </Collapse>
+                <TextField
+                  fullWidth
+                  label="Confirm Password"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                />
+                <Button
+                  fullWidth
+                  variant="contained"
+                  type="submit"
+                  size="large"
+                  sx={{ mt: 1 }}
+                >
+                  Sign Up
+                </Button>
+              </Box>
+            </form>
+          </TabPanel>
+
+          <Divider sx={{ my: 3 }}>OR</Divider>
+
+          <Button
+            fullWidth
+            variant="outlined"
+            onClick={handleGoogleSignIn}
+            size="large"
+          >
+            Sign in with Google
+          </Button>
+        </Paper>
+      </Box>
     </Box>
   );
 };
