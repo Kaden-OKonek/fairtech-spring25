@@ -13,16 +13,13 @@ import {
   ListItemText,
   Collapse,
   Paper,
-  //AppBar,
-  //Toolbar,
 } from '@mui/material';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { auth } from '../firebase';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-//import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import { XCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import dnaBackgroundImage from '../assets/images/SciFairProjectBackgroundNew.png';
+import scienceBackgroundImage from '../assets/images/ScienceBackground.png';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -44,8 +41,6 @@ function TabPanel(props: TabPanelProps) {
     </div>
   );
 }
-
-//const dnaBackgroundImage = '../assets/images/SciFairProjectBackground.png';
 
 const AuthPage: React.FC = () => {
   const [tabValue, setTabValue] = useState(0);
@@ -151,10 +146,10 @@ const AuthPage: React.FC = () => {
         left: 0,
         width: '100%',
         minHeight: '100vh', // Ensure it covers full height
-        backgroundImage: `url(${dnaBackgroundImage})`,
+        backgroundImage: `url(${scienceBackgroundImage})`,
         backgroundSize: 'cover', // Scale image to cover entire area
-        backgroundPosition: 'center', // Center the image
-        backgroundRepeat: 'no-repeat', // Prevent image from repeating
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
         display: 'flex',
         flexDirection: 'column',
         overflow: 'auto', // Allow scrolling if content exceeds viewport
