@@ -120,4 +120,20 @@ export const usersService = {
   async getActiveUsersByRole(role: UserRole): Promise<User[]> {
     return this.getUsersByRoleAndStatus(role, 'active');
   },
+
+  async changeUserRole(userId: string, newRole: any) {
+    try {
+      // Reference the specific document using its ID
+      const userDocRef = doc(db, 'users', userId);
+
+      //Update the userType field
+      await updateDoc(userDocRef, {
+        userType: newRole,
+      });
+
+      console.log('User role updated successfully');
+    } catch (error) {
+      console.error('Error updating user role:', error);
+    }
+  },
 };

@@ -14,7 +14,11 @@ import {
   Collapse,
   Paper,
 } from '@mui/material';
-import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import {
+  GoogleAuthProvider,
+  sendPasswordResetEmail,
+  signInWithPopup,
+} from 'firebase/auth';
 import { auth } from '../firebase';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { XCircle } from 'lucide-react';
@@ -52,6 +56,8 @@ const AuthPage: React.FC = () => {
   const [showPasswordRequirements, setShowPasswordRequirements] =
     useState(false);
   const { signIn, signUp } = useAuth();
+
+  const emailRegExpression = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; //email format
 
   const [passwordRequirements, setPasswordRequirements] = useState({
     length: false,
@@ -136,6 +142,18 @@ const AuthPage: React.FC = () => {
 
   const handlePasswordBlur = () => {
     setShowPasswordRequirements(false);
+  };
+
+  const handleForgotPassword = async () => {
+    //Uses Firestore's build in function to email user with reset link
+    sendPasswordResetEmail(auth, email)
+      .then(() => {
+        alert('A Password Reset Link has been sent to your email');
+      })
+      .catch((error) => {
+        console.log(error.code);
+        console.log(error.message);
+      });
   };
 
   return (
@@ -240,6 +258,18 @@ const AuthPage: React.FC = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
+                {emailRegExpression.test(email) && ( //reset password only appears if email is correctly formatted
+                  <Box>
+                    <Tabs
+                      onChange={handleForgotPassword}
+                      centered
+                      style={{ height: 5, margin: -10 }}
+                    >
+                      <Tab label="Forget Password?" />
+                    </Tabs>
+                  </Box>
+                )}
+
                 <Button
                   fullWidth
                   variant="contained"

@@ -25,9 +25,17 @@ import {
   Alert,
   Menu,
 } from '@mui/material';
-import { MoreVertical, Lock, Ban, CheckCircle, Trash2 } from 'lucide-react';
+import {
+  MoreVertical,
+  Lock,
+  Ban,
+  CheckCircle,
+  Trash2,
+  FileUser,
+} from 'lucide-react';
 import { usersService, User } from '../../services/users.service';
 import { superAdminService } from '../../services/superAdmin.service';
+import { useAuth } from '../../contexts/AuthContext';
 
 const UserManagement: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -35,7 +43,11 @@ const UserManagement: React.FC = () => {
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
+  const [changeRoleType, setChangeRoleType] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState('all');
+  const [passwordResetAlert, setPasswordResetAlert] = useState<string | null>(
+    null
+  );
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -44,7 +56,7 @@ const UserManagement: React.FC = () => {
   const [actionDialogOpen, setActionDialogOpen] = useState(false);
   const [emailDialogOpen, setEmailDialogOpen] = useState(false);
   const [currentAction, setCurrentAction] = useState<{
-    type: 'suspend' | 'activate' | 'resetPassword' | 'delete';
+    type: 'suspend' | 'activate' | 'resetPassword' | 'delete' | 'changeRole';
     userId: string;
     userEmail?: string;
   } | null>(null);
@@ -57,6 +69,12 @@ const UserManagement: React.FC = () => {
   const [emailSubject, setEmailSubject] = useState('');
   const [emailContent, setEmailContent] = useState('');
   const [newPassword, setNewPassword] = useState('');
+
+  //Delay function
+  const delay = (ms: number) =>
+    new Promise((resolve) => setTimeout(resolve, ms));
+
+  const { authStatus } = useAuth();
 
   useEffect(() => {
     const unsubscribe = usersService.subscribeToUsers((updatedUsers) => {
@@ -126,7 +144,7 @@ const UserManagement: React.FC = () => {
   };
 
   const handleUserAction = async (
-    action: 'suspend' | 'activate' | 'resetPassword' | 'delete',
+    action: 'suspend' | 'activate' | 'resetPassword' | 'delete' | 'changeRole',
     userId: string
   ) => {
     const user = users.find((u) => u.id === userId);
@@ -135,6 +153,32 @@ const UserManagement: React.FC = () => {
     setCurrentAction({ type: action, userId, userEmail: user.email });
     setActionDialogOpen(true);
     handleMenuClose();
+  };
+
+  const checkPasswordRequirements = (password: string) => {
+    let missingRequirementsMessage = 'The New Password must contain:';
+    if (password.length < 6) {
+      missingRequirementsMessage += '\n • At Least 6 Characters';
+    }
+    if (!/[A-Z]/.test(password)) {
+      missingRequirementsMessage += '\n • One Uppercase Letter';
+    }
+    if (!/[a-z]/.test(password)) {
+      missingRequirementsMessage += '\n • One Lower Letter';
+    }
+    if (!/\d/.test(password)) {
+      missingRequirementsMessage += '\n • One Number';
+    }
+    if (!/[^a-zA-Z0-9]/.test(password)) {
+      missingRequirementsMessage += '\n • One Special Character';
+    }
+
+    if (missingRequirementsMessage == 'The New Password must contain:') {
+      //Password has all requirements fullfilled
+      return null;
+    } else {
+      return missingRequirementsMessage;
+    }
   };
 
   const handleActionConfirm = async () => {
@@ -155,22 +199,42 @@ const UserManagement: React.FC = () => {
           break;
         case 'resetPassword':
           if (!newPassword) {
-            setError('New password is required');
+            //Send alert message that input is required to reset password
+            setPasswordResetAlert('New password is required');
+            return;
+          }
+          //Check to see if our new password meets all password requirements
+          const requirementMessage = checkPasswordRequirements(newPassword);
+          //If there are changes to be made to the password, alert the user
+          if (requirementMessage != null) {
+            setPasswordResetAlert(requirementMessage);
             return;
           }
           await superAdminService.resetUserPassword(
             currentAction.userId,
             newPassword
           );
+          //Send alert message that resetting password was a success
+          setPasswordResetAlert('Success! Password Reset');
+          //Delay 3 sec so the user sees the alert message before dialog
+          await delay(3000);
           break;
         case 'delete':
           // Implement user deletion
+          break;
+        case 'changeRole':
+          await usersService.changeUserRole(
+            currentAction.userId,
+            changeRoleType
+          );
           break;
       }
 
       setActionDialogOpen(false);
       setCurrentAction(null);
+      setPasswordResetAlert(null);
       setNewPassword('');
+      setChangeRoleType(null);
     } catch (err) {
       setError('Failed to perform action. Please try again.');
     }
@@ -285,7 +349,15 @@ const UserManagement: React.FC = () => {
                     </TableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>
-                      <Chip label={user.userType} size="small" />
+                      <Chip
+                        label={
+                          //superAdmin is the only userType that is in PascalCase because it is two words, so if we deal with a Super Admin, output a different text
+                          user.userType === 'superAdmin'
+                            ? 'super admin'
+                            : user.userType
+                        }
+                        size="small"
+                      />
                     </TableCell>
                     <TableCell>
                       <Chip
@@ -347,6 +419,18 @@ const UserManagement: React.FC = () => {
           <Trash2 size={18} style={{ marginRight: 8 }} />
           Delete User
         </MenuItem>
+        {selectedUserId !== (authStatus.user?.uid ?? null) && ( //The current user cannot edit their own role ensuring that there will at least always remain one superAdmin
+          <>
+            <MenuItem
+              onClick={() =>
+                selectedUserId && handleUserAction('changeRole', selectedUserId)
+              }
+            >
+              <FileUser size={18} style={{ marginRight: 8 }} />
+              Change Role
+            </MenuItem>
+          </>
+        )}
       </Menu>
 
       {/* Action Dialog */}
@@ -357,13 +441,31 @@ const UserManagement: React.FC = () => {
         <DialogTitle>
           {currentAction?.type === 'resetPassword'
             ? 'Reset Password'
-            : `${currentAction?.type.charAt(0).toUpperCase()}${currentAction?.type.slice(1)} User`}
+            : currentAction?.type === 'changeRole'
+              ? 'Change User Role'
+              : `${currentAction?.type.charAt(0).toUpperCase()}${currentAction?.type.slice(1)} User`}
         </DialogTitle>
         <DialogContent>
+          {passwordResetAlert && (
+            <Box>
+              <Alert
+                severity={
+                  passwordResetAlert.includes('Success') ? 'success' : 'error'
+                }
+                sx={{ mb: 2 }}
+              >
+                <Typography sx={{ whiteSpace: 'pre-line' }}>
+                  {passwordResetAlert}
+                </Typography>
+              </Alert>
+            </Box>
+          )}
           <DialogContentText>
             {currentAction?.type === 'resetPassword'
               ? `Reset password for user: ${currentAction.userEmail}`
-              : `Are you sure you want to ${currentAction?.type} this user?`}
+              : currentAction?.type === 'changeRole'
+                ? `Change role for user: ${currentAction.userEmail}`
+                : `Are you sure you want to ${currentAction?.type} this user?`}
           </DialogContentText>
           {currentAction?.type === 'resetPassword' && (
             <TextField
@@ -376,9 +478,52 @@ const UserManagement: React.FC = () => {
               onChange={(e) => setNewPassword(e.target.value)}
             />
           )}
+          {currentAction?.type === 'changeRole' && (
+            <>
+              <FormControl size="small" sx={{ minWidth: 250 }}>
+                <InputLabel>Role</InputLabel>
+                <Select
+                  value={changeRoleType}
+                  label="Role"
+                  onChange={(e) => setChangeRoleType(e.target.value)}
+                >
+                  <MenuItem value="student">Student</MenuItem>
+                  <MenuItem value="teacher">Teacher</MenuItem>
+                  <MenuItem value="judge">Judge</MenuItem>
+                  <MenuItem value="volunteer">Volunteer</MenuItem>
+                  <MenuItem value="admin">Admin</MenuItem>
+                  <MenuItem value="superAdmin">Super Admin</MenuItem>
+                </Select>
+              </FormControl>
+              {changeRoleType === 'superAdmin' && (
+                //Warning Message if the role type is changing to Super Admin to ensure we protect our application
+                <Box>
+                  <Alert severity={'warning'} sx={{ mb: 2 }}>
+                    <Typography sx={{ whiteSpace: 'pre-line' }}>
+                      WARNING: You are attempting to promote a user to have a
+                      role as a Super Admin. Doing so would give the user access
+                      to all high power functions including the ablity to demote
+                      your role as a Super Admin. If you do not trust this user
+                      or know who they are, do not proceed and cancel this
+                      action.
+                    </Typography>
+                  </Alert>
+                </Box>
+              )}
+            </>
+          )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setActionDialogOpen(false)}>Cancel</Button>
+          <Button
+            onClick={() => {
+              setActionDialogOpen(false);
+              setPasswordResetAlert(null);
+              setChangeRoleType(null);
+              setNewPassword('');
+            }}
+          >
+            Cancel
+          </Button>
           <Button
             onClick={handleActionConfirm}
             variant="contained"
