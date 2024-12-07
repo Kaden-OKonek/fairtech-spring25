@@ -54,7 +54,7 @@ const FormRequirementsAssessment: React.FC = () => {
       if (Object.values(parsedAnswers).every((answer) => answer)) {
         setAnswers(parsedAnswers);
         setShowQuestionnaire(false);
-        setActiveStep(questions.length);
+        setActiveStep(6);
       }
     }
   }, []);
