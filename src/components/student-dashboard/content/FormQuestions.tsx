@@ -84,7 +84,10 @@ const FormRequirementsAssessment: React.FC = () => {
     if (values.riskAssessment === 'yes') conditionalForms.push('Form 3');
     if (values.biohazards === 'yes') conditionalForms.push('Form 6B');
     if (values.humanSubjects === 'yes') conditionalForms.push('Form 7');
-    if (values.invertebrates === 'yes' && values.regulatedInstitution === 'yes') {
+    if (
+      values.invertebrates === 'yes' &&
+      values.regulatedInstitution === 'yes'
+    ) {
       conditionalForms.push('Form 5B');
     }
 
