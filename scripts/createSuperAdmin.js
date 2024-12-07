@@ -38,27 +38,16 @@ async function createSuperAdmin(email) {
 
     // Update user profile in Firestore
     console.log('Updating Firestore profile...');
-    await admin
-      .firestore()
-      .collection('users')
-      .doc(user.uid)
-      .set(
-        {
-          email: email,
-          userType: 'superAdmin',
-          registrationComplete: true,
-          permissions: {
-            manageUsers: true,
-            manageRoles: true,
-            manageFairs: true,
-            manageAnnouncements: true,
-            systemConfiguration: true,
-          },
-          createdAt: admin.firestore.FieldValue.serverTimestamp(),
-          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-        },
-        { merge: true }
-      );
+    await admin.firestore().collection('users').doc(user.uid).set(
+      {
+        email: email,
+        userType: 'superAdmin',
+        registrationComplete: true,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      },
+      { merge: true }
+    );
 
     console.log('✅ Successfully promoted user to Super Admin');
     console.log('Details:');

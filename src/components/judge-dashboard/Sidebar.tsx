@@ -10,7 +10,7 @@ import {
   useTheme,
   Divider,
 } from '@mui/material';
-import { FileBadge, UserCircle, Settings } from 'lucide-react';
+import { FileBadge, Settings, UserCircle } from 'lucide-react';
 import LogoutButton from '../LogoutButton';
 import { useAuth } from '../../contexts/AuthContext';
 

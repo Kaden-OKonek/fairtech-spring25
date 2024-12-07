@@ -14,7 +14,6 @@ import {
   Alert,
   Tabs,
   Tab,
-  TextField,
   Select,
   MenuItem,
   FormControl,
@@ -81,8 +80,9 @@ const ProjectDocuments: React.FC<ProjectDocumentsDialogProps> = ({
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [formType, setFormType] = useState<FormType>('1B');
-  const [formTitle, setFormTitle] = useState('');
   const [responsibleStudentId, setResponsibleStudentId] = useState<string>('');
+  const [responsibleStudentName, setResponsibleStudentName] =
+    useState<string>('');
   const [uploading, setUploading] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
 
@@ -126,7 +126,7 @@ const ProjectDocuments: React.FC<ProjectDocumentsDialogProps> = ({
   };
 
   const handleUpload = async () => {
-    if (!selectedFile || !responsibleStudentId || !formTitle) return;
+    if (!selectedFile || !responsibleStudentId) return;
 
     try {
       setUploading(true);
@@ -136,12 +136,12 @@ const ProjectDocuments: React.FC<ProjectDocumentsDialogProps> = ({
         projectId,
         projectName,
         responsibleStudentId,
+        responsibleStudentName,
         assignedAt: new Date(),
       };
 
       await formsService.submitProjectForm(
         projectContext,
-        formTitle,
         selectedFile,
         formType,
         false // isRequired - could be determined by form type or passed as prop
@@ -160,7 +160,6 @@ const ProjectDocuments: React.FC<ProjectDocumentsDialogProps> = ({
   const resetUploadForm = () => {
     setSelectedFile(null);
     setFormType('1B');
-    setFormTitle('');
     setResponsibleStudentId('');
   };
 
@@ -418,19 +417,25 @@ const ProjectDocuments: React.FC<ProjectDocumentsDialogProps> = ({
                 </Select>
               </FormControl>
 
-              <TextField
-                fullWidth
-                label="Form Title"
-                value={formTitle}
-                onChange={(e) => setFormTitle(e.target.value)}
-              />
-
               <FormControl fullWidth>
                 <InputLabel>Responsible Student</InputLabel>
                 <Select
                   value={responsibleStudentId}
                   label="Responsible Student"
-                  onChange={(e) => setResponsibleStudentId(e.target.value)}
+                  onChange={(e) => {
+                    const selectedId = e.target.value;
+                    setResponsibleStudentId(selectedId);
+
+                    // Find the selected student and set their name
+                    const selectedStudent = projectMembers.find(
+                      (member) => member.userId === selectedId
+                    );
+                    if (selectedStudent) {
+                      setResponsibleStudentName(
+                        `${selectedStudent.firstName} ${selectedStudent.lastName}`
+                      );
+                    }
+                  }}
                 >
                   {projectMembers.map((member) => (
                     <MenuItem key={member.userId} value={member.userId}>
@@ -467,12 +472,7 @@ const ProjectDocuments: React.FC<ProjectDocumentsDialogProps> = ({
             <Button
               variant="contained"
               onClick={handleUpload}
-              disabled={
-                !selectedFile ||
-                !responsibleStudentId ||
-                !formTitle ||
-                uploading
-              }
+              disabled={!selectedFile || !responsibleStudentId || uploading}
             >
               {uploading ? 'Uploading...' : 'Upload'}
             </Button>

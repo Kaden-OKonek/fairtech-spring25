@@ -31,7 +31,6 @@ const validationSchema = Yup.object().shape({
     .matches(/^[0-9]{5}$/, 'Zip code must be 5 digits')
     .required('Zip code is required'),
   school: Yup.string().required('School is required'),
-  department: Yup.string(),
 });
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
@@ -173,7 +172,6 @@ const TeacherRegistration: React.FC = () => {
               state: '',
               zipCode: '',
               school: '',
-              department: '',
             }}
             validationSchema={validationSchema}
             onSubmit={handleSubmit}
@@ -259,16 +257,6 @@ const TeacherRegistration: React.FC = () => {
                       label="School"
                       error={touched.school && Boolean(errors.school)}
                       helperText={touched.school && errors.school}
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Field
-                      as={TextField}
-                      fullWidth
-                      name="department"
-                      label="Department (Optional)"
-                      error={touched.department && Boolean(errors.department)}
-                      helperText={touched.department && errors.department}
                     />
                   </Grid>
                 </Grid>

@@ -1,111 +1,87 @@
-import React, { useState } from 'react';
-import { Box, Container, Typography } from '@mui/material';
+// pages/JudgeDashboard.tsx
+
+import React, { useState, useEffect } from 'react';
+import { Box, Container, CircularProgress } from '@mui/material';
 import JudgeSidebar, {
   JudgeContentType,
 } from '../components/judge-dashboard/Sidebar';
+import ProjectScoringList from '../components/judge-dashboard/content/ProjectScoringList';
+import ProjectScoringDialog from '../components/judge-dashboard/content/ProjectScoringDialog';
+import { judgingService } from '../services/judging.service';
+import { useAuth } from '../contexts/AuthContext';
+import { Project } from '../types/project.types';
+import { ProjectScore } from '../types/judging.types';
 
 const JudgeDashboard: React.FC = () => {
+  const { authStatus } = useAuth();
   const [activeContent, setActiveContent] =
     useState<JudgeContentType>('scoring');
-  const [pendingTasksCount] = useState(0);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [existingScore, setExistingScore] = useState<
+    ProjectScore | undefined
+  >();
+  const [isScoringDialogOpen, setScoringDialogOpen] = useState(false);
+  const [pendingTasksCount, setPendingTasksCount] = useState(0);
+
+  // Get pending tasks count on component mount
+  useEffect(() => {
+    const loadPendingTasks = async () => {
+      if (authStatus.user?.uid) {
+        const stats = await judgingService.getJudgeStats(authStatus.user.uid);
+        setPendingTasksCount(stats.pending);
+      }
+    };
+
+    loadPendingTasks();
+  }, [authStatus.user?.uid]);
+
+  const handleViewProject = async (project: Project) => {
+    setSelectedProject(project);
+    if (authStatus.user?.uid) {
+      // Check if there's an existing score for this project
+      const projectData = await judgingService.getProjectScore(
+        project.id,
+        authStatus.user.uid
+      );
+      setExistingScore(projectData);
+    }
+    setScoringDialogOpen(true);
+  };
+
+  const handleCloseScoringDialog = () => {
+    setScoringDialogOpen(false);
+    setSelectedProject(null);
+    setExistingScore(undefined);
+  };
 
   const renderContent = () => {
     switch (activeContent) {
       case 'scoring':
-        return (
-          <Box>
-            <Box sx={{ mb: 4 }}>
-              <Typography
-                variant="h4"
-                gutterBottom
-                color="primary"
-                fontWeight="bold"
-              >
-                Project Scoring
-              </Typography>
-              <Typography variant="body1" color="text.secondary">
-                Score and review projects
-              </Typography>
-            </Box>
-            <Box
-              sx={{
-                backgroundColor: 'background.paper',
-                borderRadius: '12px',
-                boxShadow: 1,
-                p: 3,
-              }}
-            >
-              <p>Projects list and information will go here.</p>
-            </Box>
-          </Box>
-        );
-      case 'profile':
-        return (
-          <Box>
-            <Box sx={{ mb: 4 }}>
-              <Typography
-                variant="h4"
-                gutterBottom
-                color="primary"
-                fontWeight="bold"
-              >
-                Judge Profile
-              </Typography>
-              <Typography variant="body1" color="text.secondary">
-                Manage your judge information and preferences
-              </Typography>
-            </Box>
-            <Box
-              sx={{
-                backgroundColor: 'background.paper',
-                borderRadius: '12px',
-                boxShadow: 1,
-                p: 3,
-              }}
-            >
-              <p>Profile information will go here</p>
-            </Box>
-          </Box>
-        );
-      case 'settings':
-        return (
-          <Box>
-            <Box sx={{ mb: 4 }}>
-              <Typography
-                variant="h4"
-                gutterBottom
-                color="primary"
-                fontWeight="bold"
-              >
-                Settings
-              </Typography>
-              <Typography variant="body1" color="text.secondary">
-                Manage your account settings and preferences
-              </Typography>
-            </Box>
-            <Box
-              sx={{
-                backgroundColor: 'background.paper',
-                borderRadius: '12px',
-                boxShadow: 1,
-                p: 3,
-              }}
-            >
-              <p>Settings options will go here</p>
-            </Box>
-          </Box>
-        );
+        return <ProjectScoringList onViewProject={handleViewProject} />;
       default:
         return null;
     }
   };
+
+  if (authStatus.isLoading) {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="100vh"
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Box
       sx={{
         display: 'flex',
         minHeight: '100vh',
-        backgroundColor: 'background.default',
+        bgcolor: 'background.default',
       }}
     >
       <JudgeSidebar
@@ -114,19 +90,22 @@ const JudgeDashboard: React.FC = () => {
         pendingTasksCount={pendingTasksCount}
       />
 
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          backgroundColor: 'background.default',
-          p: 3,
-          minHeight: '100vh',
-        }}
-      >
+      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <Container maxWidth="xl">
           <Box sx={{ py: 2 }}>{renderContent()}</Box>
         </Container>
       </Box>
+
+      {/* Scoring Dialog */}
+      {selectedProject && (
+        <ProjectScoringDialog
+          open={isScoringDialogOpen}
+          onClose={handleCloseScoringDialog}
+          project={selectedProject}
+          existingScore={existingScore}
+          isAssigned={false} // This would be determined by checking assignments
+        />
+      )}
     </Box>
   );
 };

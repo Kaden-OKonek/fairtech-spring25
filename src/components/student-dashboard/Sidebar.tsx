@@ -11,26 +11,26 @@ import {
   Divider,
 } from '@mui/material';
 import {
-  ClipboardList,
   Microscope,
   Settings,
   FileQuestion,
+  MessageSquare,
 } from 'lucide-react';
 import LogoutButton from '../LogoutButton';
-import { ContentType } from '../../types/studentDashboard';
 import { useAuth } from '../../contexts/AuthContext';
+import { ContentType } from '../../types/studentDashboard';
 
 interface SidebarProps {
   activeContent: ContentType;
   onContentChange: (content: ContentType) => void;
   pendingFormsCount?: number;
-  reviewedFormsCount?: number;
+  newFeedbackCount?: number;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
   activeContent,
   onContentChange,
-  pendingFormsCount = 0,
+  newFeedbackCount = 0,
 }) => {
   const theme = useTheme();
   const { authStatus } = useAuth();
@@ -67,8 +67,8 @@ const Sidebar: React.FC<SidebarProps> = ({
       <List sx={{ px: 2, flexGrow: 1 }}>
         <ListItem disablePadding sx={{ mb: 1 }}>
           <ListItemButton
-            onClick={() => onContentChange('paperwork')}
-            selected={activeContent === 'paperwork'}
+            onClick={() => onContentChange('projects')}
+            selected={activeContent === 'projects'}
             sx={{
               borderRadius: '12px',
               '&.Mui-selected': {
@@ -79,18 +79,29 @@ const Sidebar: React.FC<SidebarProps> = ({
               },
             }}
           >
-            <ClipboardList size={20} />
-            <ListItemText primary="My Forms" sx={{ ml: 2 }} />
-            {pendingFormsCount > 0 && (
-              <Badge
-                badgeContent={pendingFormsCount}
-                color="error"
-                sx={{
-                  '& .MuiBadge-badge': {
-                    backgroundColor: theme.palette.error.main,
-                  },
-                }}
-              />
+            <Microscope size={20} />
+            <ListItemText primary="My Projects" sx={{ ml: 2 }} />
+          </ListItemButton>
+        </ListItem>
+
+        <ListItem disablePadding sx={{ mb: 1 }}>
+          <ListItemButton
+            onClick={() => onContentChange('feedback')}
+            selected={activeContent === 'feedback'}
+            sx={{
+              borderRadius: '12px',
+              '&.Mui-selected': {
+                backgroundColor: 'primary.lighter',
+                '&:hover': {
+                  backgroundColor: 'primary.light',
+                },
+              },
+            }}
+          >
+            <MessageSquare size={20} />
+            <ListItemText primary="Feedback" sx={{ ml: 2 }} />
+            {newFeedbackCount > 0 && (
+              <Badge badgeContent={newFeedbackCount} color="primary" />
             )}
           </ListItemButton>
         </ListItem>
@@ -110,26 +121,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             }}
           >
             <FileQuestion size={20} />
-            <ListItemText primary="Form Requirements" sx={{ ml: 2 }} />
-          </ListItemButton>
-        </ListItem>
-
-        <ListItem disablePadding sx={{ mb: 1 }}>
-          <ListItemButton
-            onClick={() => onContentChange('projects')}
-            selected={activeContent === 'projects'}
-            sx={{
-              borderRadius: '12px',
-              '&.Mui-selected': {
-                backgroundColor: 'primary.lighter',
-                '&:hover': {
-                  backgroundColor: 'primary.light',
-                },
-              },
-            }}
-          >
-            <Microscope size={20} />
-            <ListItemText primary="My Projects" sx={{ ml: 2 }} />
+            <ListItemText primary="Required Forms" sx={{ ml: 2 }} />
           </ListItemButton>
         </ListItem>
 

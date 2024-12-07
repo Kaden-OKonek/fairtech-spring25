@@ -1,5 +1,14 @@
 export type FairType = 'highSchool' | 'middleSchool';
-export type ProjectStatus = 'draft' | 'active' | 'submitted' | 'archived';
+export type ProjectStatus =
+  | 'draft'
+  | 'active'
+  | 'submitted'
+  | 'archived'
+  | 'pending'
+  | 'approved'
+  | 'rejected'
+  | 'in_review'
+  | 'needs_revision';
 
 export interface AdultSponsor {
   name: string;

@@ -38,7 +38,7 @@ const TeacherDashboard: React.FC = () => {
       case 'projects':
         return <ProjectsContent />;
       default:
-        return <ClassContent />;
+        return null;
     }
   };
 
