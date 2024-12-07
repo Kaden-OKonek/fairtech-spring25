@@ -36,6 +36,15 @@ interface RequiredForms {
 const STORAGE_KEY = 'formRequirementsAnswers';
 
 const FormRequirementsAssessment: React.FC = () => {
+  const questions = [
+    'Does your project involve human subjects in any form (even for feedback)?',
+    'Does your project involve invertebrate animals?',
+    'Does your project involve potential biohazards?',
+    'Was the research conducted in a regulated institution or industrial setting?',
+    'Does your project require a qualified scientist?',
+    'Does your project involve hazardous chemicals, materials, or devices?',
+  ];
+
   const [activeStep, setActiveStep] = useState(0);
   const [showQuestionnaire, setShowQuestionnaire] = useState(true);
   const [answers, setAnswers] = useState<FormAnswers>({
@@ -54,20 +63,12 @@ const FormRequirementsAssessment: React.FC = () => {
       if (Object.values(parsedAnswers).every((answer) => answer)) {
         setAnswers(parsedAnswers);
         setShowQuestionnaire(false);
-        setActiveStep(6);
+        setActiveStep(questions.length);
       }
     }
-  }, []);
+  }, [questions.length]);
 
-  const questions = [
-    'Does your project involve human subjects in any form (even for feedback)?',
-    'Does your project involve invertebrate animals?',
-    'Does your project involve potential biohazards?',
-    'Was the research conducted in a regulated institution or industrial setting?',
-    'Does your project require a qualified scientist?',
-    'Does your project involve hazardous chemicals, materials, or devices?',
-  ];
-
+  
   const baseRequiredForms = {
     perPerson: ['Form 1B'],
     perProject: ['Form 1', 'Form 1A', 'Research Plan'],
