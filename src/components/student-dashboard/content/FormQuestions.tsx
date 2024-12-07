@@ -20,6 +20,9 @@ interface FormAnswers {
   humanSubjects: string;
   invertebrates: string;
   biohazards: string;
+  regulatedInstitution: string;
+  qualifiedScientist: string;
+  riskAssessment: string;
 }
 
 interface RequiredForms {
@@ -33,12 +36,24 @@ interface RequiredForms {
 const STORAGE_KEY = 'formRequirementsAnswers';
 
 const FormRequirementsAssessment: React.FC = () => {
+  const questions = [
+    'Does your project involve human subjects in any form (even for feedback)?',
+    'Does your project involve invertebrate animals?',
+    'Does your project involve potential biohazards?',
+    'Was the research conducted in a regulated institution or industrial setting?',
+    'Does your project require a qualified scientist?',
+    'Does your project involve hazardous chemicals, materials, or devices?',
+  ];
+
   const [activeStep, setActiveStep] = useState(0);
   const [showQuestionnaire, setShowQuestionnaire] = useState(true);
   const [answers, setAnswers] = useState<FormAnswers>({
     humanSubjects: '',
     invertebrates: '',
     biohazards: '',
+    regulatedInstitution: '',
+    qualifiedScientist: '',
+    riskAssessment: '',
   });
 
   useEffect(() => {
@@ -48,28 +63,33 @@ const FormRequirementsAssessment: React.FC = () => {
       if (Object.values(parsedAnswers).every((answer) => answer)) {
         setAnswers(parsedAnswers);
         setShowQuestionnaire(false);
-        setActiveStep(3);
+        setActiveStep(questions.length);
       }
     }
-  }, []);
-
-  const questions = [
-    'Does your project involve human subjects in any form (even for feedback)?',
-    'Does your project involve invertebrate animals?',
-    'Does your project involve potential biohazards?',
-  ];
+  }, [questions.length]);
 
   const baseRequiredForms = {
     perPerson: ['Form 1B'],
-    perProject: ['Form 1', 'Form 1A', 'Research Plan', 'Abstract'],
+    perProject: ['Form 1', 'Form 1A', 'Research Plan'],
   };
 
   const getRequiredForms = (values: FormAnswers): RequiredForms => {
     const conditionalForms: string[] = [];
 
     if (values.humanSubjects === 'yes') conditionalForms.push('Form 4');
-    if (values.invertebrates === 'yes') conditionalForms.push('Form 6A');
+    if (values.invertebrates === 'yes') conditionalForms.push('Form 5A');
+    if (values.biohazards === 'yes') conditionalForms.push('Form 6A');
+    if (values.regulatedInstitution === 'yes') conditionalForms.push('Form 1C');
+    if (values.qualifiedScientist === 'yes') conditionalForms.push('Form 2');
+    if (values.riskAssessment === 'yes') conditionalForms.push('Form 3');
     if (values.biohazards === 'yes') conditionalForms.push('Form 6B');
+    if (values.humanSubjects === 'yes') conditionalForms.push('Form 7');
+    if (
+      values.invertebrates === 'yes' &&
+      values.regulatedInstitution === 'yes'
+    ) {
+      conditionalForms.push('Form 5B');
+    }
 
     return {
       baseRequired: baseRequiredForms,
@@ -96,6 +116,9 @@ const FormRequirementsAssessment: React.FC = () => {
       humanSubjects: '',
       invertebrates: '',
       biohazards: '',
+      regulatedInstitution: '',
+      qualifiedScientist: '',
+      riskAssessment: '',
     });
     localStorage.removeItem(STORAGE_KEY);
   };
