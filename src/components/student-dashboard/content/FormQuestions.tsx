@@ -68,7 +68,6 @@ const FormRequirementsAssessment: React.FC = () => {
     }
   }, [questions.length]);
 
-  
   const baseRequiredForms = {
     perPerson: ['Form 1B'],
     perProject: ['Form 1', 'Form 1A', 'Research Plan'],
