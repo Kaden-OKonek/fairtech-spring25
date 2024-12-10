@@ -65,6 +65,10 @@ src/
 - `npm run build`: Builds the app for production
 - `npm run eject`: Ejects from Create React App (one-way operation)
 
+## Recommended
+
+- Install Prettier and Eslint extensions on Visual Studio Code.
+
 ## Deployment
 1. Build the project: `npm run build`
 2. Deploy to Firebase Hosting: `firebase deploy`
