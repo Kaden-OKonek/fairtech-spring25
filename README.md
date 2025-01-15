@@ -27,7 +27,7 @@ This web platform manages the Southern MN Science and Engineering Fair, handling
 
 1. Clone the repository:
    ```
-   git clone https://github.com/FairTechFall24/science-fair-platform
+   git clone https://github.com/Kaden-OKonek/fairtech-spring25
    cd science-fair-platform
    ```
 
