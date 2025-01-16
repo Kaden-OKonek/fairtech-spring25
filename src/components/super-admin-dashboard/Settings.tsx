@@ -51,7 +51,7 @@ const Settings: React.FC = () => {
   return (
     <Box>
       <Typography variant="h4" gutterBottom>
-        System Settings Testing Repo
+        System Settings!
       </Typography>
 
       {/* Email Notifications */}
